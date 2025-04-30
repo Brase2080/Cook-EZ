@@ -75,7 +75,7 @@ With Cook-EZ:
 ## 🛠️ Installation & Deployment (via NPM)
 
 ```bash
-git clone https://github.com/Brase2080/cook-ez.git
+git clone https://github.com/Brase2080/Cook-EZ.git
 cd cook-ez
 
 npm install

@@ -1,0 +1,36 @@
+{
+  "name": "cook-ez",
+  "version": "1.0.0",
+  "description": "Cook-EZ is a next-generation application that blends smart nutrition, AI-powered recipe creation, calorie tracking, eco-conscious planning, and an immersive user experience. It helps you cook intelligently using ingredients you already have, tailored to your tastes, budget, health goals, and even your environmental impact.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "keywords": [
+    "cooking", 
+    "recipe", 
+    "AI",
+    "cook",
+    "nutrition",
+    "ai-recipes",
+    "calorie-tracking",
+    "eco-friendly",
+    "sustainable"
+  ],
+  "author": "Brase",
+  "license": "MIT",
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Brase2080/Cook-EZ.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Brase2080/Cook-EZ/issues"
+  },
+  "homepage": "https://github.com/Brase2080/Cook-EZ#readme",
+
+  "dependencies": {
+    "vite": "^6.3.4"
+  }
+}
