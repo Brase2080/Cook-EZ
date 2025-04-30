@@ -1,62 +1,123 @@
-# 🍽️ Cook-EZ — Smart Calorie Tracking and Personalized Recipes
+# 🍽️ Cook-EZ — Personalized Recipes and Smart AI Tracking
 
-## Overview
-
-**Cook-EZ** is an innovative application combining **calorie tracking**, **personalized recipe suggestions**, **fitness tracking**, and **environmental impact awareness**.
-
-It adapts your diet based on your **caloric needs**, **dietary preferences**, **exercise habits**, **personal tastes**, and even your **eco-friendly goals**.
-
-## Key Features
-
-- 📊 **Calorie Tracking**:
-    - Set your nutritional goals.
-    - The app adjusts meal recommendations based on your caloric expenditure.
-- 🍳 **Smart Recipes**:
-    - Recipes are **AI-generated** or **carefully selected** based on your profile.
-    - Takes into account the **ingredients you have at home**.
-    - Adapts to **specific diets** (vegetarian, vegan, keto, etc.).
-    - The AI **learns your preferences** over time to better tailor suggestions.
-- 🏃‍♂️ **Fitness Integration**:
-    - Sync with apps like **Strava**, **Google Fit**, and more.
-    - Log your physical activities to adjust your daily calorie goals.
-    - Get workout suggestions to better understand the calorie impact of your lifestyle.
-- 🌱 **Carbon Footprint Tracking**:
-    - Optional tracking of the environmental impact of your food choices.
-    - Recommendations to help reduce your carbon footprint while staying healthy.
-- 📰 **News & Updates**:
-    - Stay informed with:
-        - Seasonal food guides and themed recipes.
-        - Food price trends and budget tips.
-        - Nutritionist news and health advice.
-    - Accessible via **mobile widgets**, **push notifications**, and a **desktop version**.
-
-## Compatibility
-
-- 📱 Android
-- 🍎 iOS
-- 🖥️ Web (Desktop)
-
-## Vision
-
-Cook-EZ is not just about eating healthier:
-
-It’s about **connecting nutrition, exercise, and sustainability** into one simple and personalized experience.
-
-> "Eat better to live better — and more sustainably."
-> 
+**Cook-EZ** is a next-generation app combining **intelligent nutrition**, **AI-powered recipe creation**, **calorie tracking**, **ecological management**, and an **immersive user experience**. By leveraging powerful AI tools, the app helps you cook **with what you already have**, tailored to **your tastes, budget, health goals, and even your carbon footprint**.
 
 ---
 
-## 🚀 Roadmap
+## 💡 Core Concept
 
-- Develop the AI backend for personalized recommendations.
-- Integrate with major fitness tracking APIs (Strava, Google Fit, etc.).
-- Implement carbon footprint calculation features.
-- Launch the first smart widgets for news and recipes.
-- Open early private beta testing.
+The idea behind Cook-EZ is simple: help you cook **better**, **smarter**, and **more sustainably**.
+
+With Cook-EZ:
+
+- AI **automatically generates personalized recipes** based on the ingredients you already own.
+- You can precisely track your **calorie intake** and energy expenditure, synced with your fitness apps (Google Fit, Strava…).
+- You reduce your **food-related carbon footprint** through sustainable recommendations.
+- You stay informed with an integrated **news page** covering nutrition trends, tips, and seasonal recipes.
 
 ---
 
-## License
+## 🚀 Key Features
 
-📄 Licensed under the MIT License.
+### 🍲 AI Recipe Generation
+
+- Recipes generated on the fly according to your **preferences, diet, allergies**, and available **kitchen tools**.
+- Smart fridge analysis system (via photos, receipts, or manual entry).
+- Automatic calculation: **calories**, **ecological impact**, **shelf life**, **difficulty**.
+- **Realistic images** of each recipe automatically generated.
+
+### 📈 Nutrition and Activity Tracking
+
+- Personalized goals based on your **health profile**.
+- Calorie deficit calculated via manual entry or automatic syncing with sports activity.
+
+### 🌱 Eco-Friendly and Budget-Conscious Cooking
+
+- Carbon footprint indicator for each recipe.
+- Recipes adapted to your **ecological goals** and **weekly budget**.
+
+### 🔁 Adaptive Intelligence
+
+- Recipe history and preferences learned automatically.
+- AI-based recommendations, **community favorites**, and suggestions from our **recipe database**.
+
+### 📰 News & Ecosystem
+
+- Nutrition insights, seasonal recipes, price alerts, and tips.
+- Notifications, widgets, and mobile/desktop sync.
+
+---
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ MVP (v1.0)
+
+- AI-generated recipes based on ingredients, preferences, and calorie needs  
+- Smart database to recommand quality pre-made recipes
+- Calorie, ecological impact, and shelf life estimation  
+- Realistic food images generated with Stable Diffusion  
+- Newsfeed with seasonal foods, price alerts, and nutrition insights  
+
+---
+
+### 🚀 Future Versions
+
+- Voice assistant integration  
+- Offline mode with delayed sync  
+- Smart weekly meal planning (budget, ecology, health goals)  
+- Widget support (mobile & desktop)  
+- Public API for third-party integration  
+
+---
+
+## 🛠️ Installation & Deployment (via NPM)
+
+```bash
+git clone https://github.com/Brase2080/cook-ez.git
+cd cook-ez
+
+npm install
+npm run dev
+```
+---
+
+## 🧰 Technologies Used
+
+- **Langchain** & **ChatGPT** — Recipe generation, user context analysis.  
+- **Stable Diffusion** — Dish image generation.  
+- **Google Cloud (Speech-to-Text, Vision)** — Voice input and food recognition.  
+- **ZXing** — QR code scanning on packaging.  
+- **NPM** — Project and dependency management.  
+
+---
+
+## 🖥️ Compatibility
+
+- 📱 Android  
+- 🍎 iOS  
+- 🖥️ PC  
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU General Public License v3.0**.  
+You are free to use, study, modify, and distribute this software, provided that any redistribution (modified or not) remains under the same license.
+
+> See the LICENSE file for more information.
+
+---
+
+## 🤝 Contribute
+
+Contributions are welcome! Whether you're a developer, nutritionist, UX designer, or passionate cook, your help is appreciated.
+
+---
+
+## 📬 Contact
+
+For any questions, ideas, or partnerships:
+
+📧 [tom.sonnerat@oteria.fr](mailto:tom.sonnerat@oteria.fr)
