@@ -8,8 +8,8 @@
     "build": "vite build"
   },
   "keywords": [
-    "cooking", 
-    "recipe", 
+    "cooking",
+    "recipe",
     "AI",
     "cook",
     "nutrition",
@@ -20,7 +20,6 @@
   ],
   "author": "Brase",
   "license": "MIT",
-
   "repository": {
     "type": "git",
     "url": "https://github.com/Brase2080/Cook-EZ.git"
@@ -29,8 +28,17 @@
     "url": "https://github.com/Brase2080/Cook-EZ/issues"
   },
   "homepage": "https://github.com/Brase2080/Cook-EZ#readme",
-
   "dependencies": {
-    "vite": "^6.3.4"
+    "cors": "^2.8.5",
+    "csurf": "^1.11.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "pg": "^8.16.0",
+    "vite": "^6.3.5",
+    "zod": "^3.25.7"
   }
 }
