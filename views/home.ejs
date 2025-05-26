@@ -3,13 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Cook-EZ - Your Personal Cooking Assistant</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h1>Test homepage</h1>
+    <nav class="nav">
+        <div class="container nav-content">
+            <a href="/" class="nav-title">Cook-EZ</a>
+            <div class="nav-links">
+                <a href="/auth/login" class="nav-link">Login</a>
+                <a href="/auth/register" class="nav-link">Register</a>
+            </div>
+        </div>
+    </nav>
 
-    <a href="/auth/logout">Logout</a>
-    <a href="/auth/login">Login</a>
-    <a href="/">Homepage</a>
+    <section class="hero">
+        <div class="container hero-content">
+            <h1 class="hero-title">Your Personal Cooking Assistant</h1>
+            <p class="hero-subtitle">Plan meals, track nutrition, and discover new recipes all in one place.</p>
+            <div class="hero-buttons">
+                <a href="/auth/register" class="btn btn-primary">Get Started</a>
+                <a href="/auth/login" class="btn btn-secondary">Sign In</a>
+            </div>
+        </div>
+    </section>
 </body>
 </html>

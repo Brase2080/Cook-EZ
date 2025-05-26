@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Cook-EZ</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="nav">
+        <div class="container nav-content">
+            <a href="/" class="nav-title">Cook-EZ</a>
+            <div class="nav-links">
+                <a href="/auth/login" class="nav-link">Login</a>
+                <a href="/auth/register" class="nav-link">Register</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main">
+        <div class="auth-container">
+            <h1 class="auth-title">Login to Cook-EZ</h1>
+            <% if (locals.error) { %>
+                <div class="error-message"><%= error %></div>
+            <% } %>
+            <form action="/auth/login" method="POST">
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            <div class="auth-links">
+                <p>Don't have an account? <a href="/auth/register" class="auth-link">Register here</a></p>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html> 
