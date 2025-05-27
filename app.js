@@ -3,6 +3,7 @@ import session from 'express-session';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import flash from 'connect-flash';
 import { initDatabase } from './config/database.js';
 import passport from './config/passport.js';
 import authRoutes from './routes/auth.js';
@@ -32,7 +33,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET || '',
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -44,6 +45,8 @@ app.use(session({
   name: 'sessionId'
 }));
 
+app.use(flash());
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -52,7 +55,13 @@ app.set('views', './views');
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-  res.render('home');
+  if (req.isAuthenticated && req.isAuthenticated()) {
+    res.redirect('/dashboard');
+  } else if (req.cookies.token) {
+    res.redirect('/auth/login');
+  } else {
+    res.redirect('/auth/login');
+  }
 });
 
 app.use('/auth', authRoutes);

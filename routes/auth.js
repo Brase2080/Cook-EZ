@@ -2,7 +2,7 @@ import express from 'express';
 import passport from '../config/passport.js';
 import { User } from '../models/User.js';
 import { authLimiter, validateRegistration, validateLogin, handleValidationErrors } from '../middleware/security.js';
-import { isAuthenticated } from '../middleware/auth.js';
+import { isAuthenticated, generateToken } from '../middleware/auth.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
@@ -130,32 +130,84 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-router.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email']
-}));
+router.get('/google',
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    prompt: 'select_account'
+  })
+);
 
-router.get('/google/callback', passport.authenticate('google', {
-  failureRedirect: '/auth/failure'
-}), (req, res) => {
-  res.redirect('/dashboard');
-});
+router.get('/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/auth/login',
+    failureFlash: 'Google authentication failed'
+  }),
+  (req, res) => {
+    const token = generateToken(req.user);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    });
+    req.session.success = 'Login successful! Welcome back.';
+    res.redirect('/dashboard');
+  }
+);
 
-router.get('/facebook', passport.authenticate('facebook', {
-  scope: ['email']
-}));
+router.get('/facebook',
+  passport.authenticate('facebook', {
+    scope: ['email', 'public_profile']
+  })
+);
 
-router.get('/facebook/callback', passport.authenticate('facebook', {
-  failureRedirect: '/auth/failure'
-}), (req, res) => {
-  res.redirect('/dashboard');
-});
+router.get('/facebook/callback',
+  passport.authenticate('facebook', {
+    failureRedirect: '/auth/login',
+    failureFlash: 'Facebook authentication failed'
+  }),
+  (req, res) => {
+    const token = generateToken(req.user);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    });
+    req.session.success = 'Login successful! Welcome back.';
+    res.redirect('/dashboard');
+  }
+);
 
-router.get('/twitter', passport.authenticate('twitter'));
+router.get('/twitter',
+  passport.authenticate('twitter', {
+    includeEmail: true
+  })
+);
 
-router.get('/twitter/callback', passport.authenticate('twitter', {
-  failureRedirect: '/auth/failure'
-}), (req, res) => {
-  res.redirect('/dashboard');
+router.get('/twitter/callback',
+  passport.authenticate('twitter', {
+    failureRedirect: '/auth/login',
+    failureFlash: 'Twitter authentication failed'
+  }),
+  (req, res) => {
+    const token = generateToken(req.user);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    });
+    req.session.success = 'Login successful! Welcome back.';
+    res.redirect('/dashboard');
+  }
+);
+
+router.get('/auth/failure', (req, res) => {
+  res.render('auth/login', {
+    error: req.flash('error'),
+    success: null
+  });
 });
 
 router.get('/me', (req, res) => {
@@ -176,13 +228,6 @@ router.get('/me', (req, res) => {
       message: 'Not authenticated'
     });
   }
-});
-
-router.get('/failure', (req, res) => {
-  res.status(401).json({
-    success: false,
-    message: 'Authentication failed'
-  });
 });
 
 export default router;

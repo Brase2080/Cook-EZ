@@ -55,30 +55,39 @@ export class User {
   }
 
   static async findByOAuthId(provider, oauthId) {
-    const connection = await pool.getConnection();
-    try {
-      const column = `${provider}_id`;
-      const [rows] = await connection.execute(
-        `SELECT id, email, name, google_id, facebook_id, twitter_id, profile_picture, email_verified, is_active FROM users WHERE ${column} = ? AND is_active = TRUE`,
-        [oauthId]
-      );
-      return rows[0] || null;
-    } finally {
-      connection.release();
-    }
+    const column = `${provider}_id`;
+    const query = `SELECT * FROM users WHERE ${column} = ?`;
+    const [rows] = await pool.query(query, [oauthId]);
+    return rows[0];
   }
 
   static async linkOAuthAccount(userId, provider, oauthId) {
-    const connection = await pool.getConnection();
-    try {
-      const column = `${provider}_id`;
-      await connection.execute(
-        `UPDATE users SET ${column} = ? WHERE id = ?`,
-        [oauthId, userId]
-      );
-    } finally {
-      connection.release();
-    }
+    const column = `${provider}_id`;
+    const query = `UPDATE users SET ${column} = ? WHERE id = ?`;
+    await pool.query(query, [oauthId, userId]);
+  }
+
+  static async createOAuthUser(profile, provider) {
+    const { email, firstName, lastName, id, photos } = profile;
+    const oauthColumn = `${provider}_id`;
+    const query = `
+      INSERT INTO users (
+        email, 
+        ${oauthColumn}, 
+        firstName, 
+        lastName, 
+        profilePicture,
+        email_verified
+      ) VALUES (?, ?, ?, ?, ?, true)
+    `;
+    const [result] = await pool.query(query, [
+      email,
+      id,
+      firstName,
+      lastName,
+      photos?.[0]?.value || null
+    ]);
+    return this.findById(result.insertId);
   }
 
   static async validatePassword(user, password) {
@@ -87,14 +96,9 @@ export class User {
   }
 
   static async updateLastLogin(userId) {
-    const connection = await pool.getConnection();
-    try {
-      await connection.execute(
-        'UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-        [userId]
-      );
-    } finally {
-      connection.release();
-    }
+    await pool.query(
+      'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+      [userId]
+    );
   }
 }

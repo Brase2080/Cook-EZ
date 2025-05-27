@@ -12,11 +12,11 @@ passport.use(new JwtStrategy({
   secretOrKey: JWT_SECRET
 }, async (payload, done) => {
   try {
-    const result = await pool.query('SELECT * FROM users WHERE id = $1', [payload.id]);
-    if (result.rows.length === 0) {
+    const result = await pool.query('SELECT * FROM users WHERE id = ?', [payload.id]);
+    if (result.length === 0) {
       return done(null, false);
     }
-    return done(null, result.rows[0]);
+    return done(null, result[0]);
   } catch (error) {
     return done(error, false);
   }
@@ -28,17 +28,39 @@ passport.use(new GoogleStrategy({
   callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    let user = await pool.query('SELECT * FROM users WHERE google_id = $1', [profile.id]);
+    let userRows = await pool.query('SELECT * FROM users WHERE google_id = ?', [profile.id]);
+    let user = userRows[0].length > 0 ? userRows[0][0] : null;
     
-    if (user.rows.length === 0) {
-      user = await pool.query(
-        'INSERT INTO users (email, google_id, name) VALUES ($1, $2, $3) RETURNING *',
-        [profile.emails[0].value, profile.id, profile.displayName]
-      );
+    if (user) {
+      await User.updateLastLogin(user.id);
+      return done(null, user);
     }
+
+    const existingUserRows = await pool.query('SELECT * FROM users WHERE email = ?', [profile.emails[0].value]);
+    const existingUser = existingUserRows[0].length > 0 ? existingUserRows[0][0] : null;
+
+    if (existingUser) {
+      await User.linkOAuthAccount(existingUser.id, 'google', profile.id);
+      await User.updateLastLogin(existingUser.id);
+      return done(null, existingUser);
+    }
+
+    const [insertResult] = await pool.execute(
+      'INSERT INTO users (email, google_id, name, profile_picture, email_verified) VALUES (?, ?, ?, ?, ?)',
+      [
+        profile.emails[0].value,
+        profile.id,
+        profile.displayName || profile.name?.givenName + ' ' + profile.name?.familyName,
+        profile.photos?.[0]?.value || null,
+        true
+      ]
+    );
     
-    return done(null, user.rows[0]);
+    user = await User.findById(insertResult.insertId);
+
+    return done(null, user);
   } catch (error) {
+    console.error('Google OAuth error:', error);
     return done(error, null);
   }
 }));
@@ -62,7 +84,7 @@ export const authenticateToken = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('Token decoded:', decoded);
         
-        const user = await User.findById(decoded.userId);
+        const user = await User.findById(decoded.id);
         console.log('User found:', user ? 'Yes' : 'No');
 
         if (!user) {
@@ -81,7 +103,7 @@ export const authenticateToken = async (req, res, next) => {
 };
 
 export const isAuthenticated = (req, res, next) => {
-    if (req.cookies.token) {
+    if (req.isAuthenticated()) {
         return res.redirect('/dashboard');
     }
     next();
