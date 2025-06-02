@@ -74,7 +74,15 @@
 
           <div class="form-group">
             <label for="whyJoin">Pourquoi rejoignez-vous Cook-EZ ? (Facultatif)</label>
-            <textarea id="whyJoin" name="whyJoin" rows="4"></textarea>
+            <select id="whyJoin" name="whyJoin">
+              <option value="">Sélectionnez une option</option>
+              <option value="learn_to_cook">Apprendre à cuisiner</option>
+              <option value="improve_skills">Améliorer mes compétences</option>
+              <option value="healthy_eating">Manger plus sainement</option>
+              <option value="save_money">Économiser de l'argent</option>
+              <option value="meal_planning">Planifier mes repas</option>
+              <option value="other">Autre</option>
+            </select>
           </div>
 
           <button class="btn" type="submit">Enregistrer mes préférences</button>

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS user_questionnaire (
     dietary_preferences JSON,
     allergies JSON,
     utensils JSON,
-    why_join TEXT,
+    why_join VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

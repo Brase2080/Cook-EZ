@@ -45,31 +45,25 @@
           <button class="btn" type="submit">Se connecter</button>
         </form>
         <div class="oauth-buttons">
-            <form action="/auth/google" method="get">
-                <button class="oauth-btn oauth-google" type="submit">
-                  <span class="oauth-icon">
-                    <img src="/images/icons/google.svg" alt="Google">
-                  </span>
-                  <span class="oauth-label">Continuer avec Google</span>
-                </button>
-              </form>              
-            <form action="/auth/facebook" method="get">
-              <button class="oauth-btn oauth-facebook" type="submit">
-                <span class="oauth-icon">
-                  <img src="/images/icons/facebook.svg" alt="Facebook">
-                </span>
-                <span class="oauth-label">Continuer avec Facebook</span>
-              </button>
-            </form>
-            <form action="/auth/twitter" method="get">
-              <button class="oauth-btn oauth-twitter" type="submit">
-                <span class="oauth-icon">
-                  <img src="/images/icons/twitter.svg" alt="Twitter">
-                </span>
-                <span class="oauth-label">Continuer avec Twitter</span>
-              </button>
-            </form>
-          </div>
+            <a href="/auth/google" class="oauth-btn oauth-google">
+              <span class="oauth-icon">
+                <img src="/images/icons/google.svg" alt="Google">
+              </span>
+              <span class="oauth-label">Continuer avec Google</span>
+            </a>
+            <a href="/auth/facebook" class="oauth-btn oauth-facebook">
+              <span class="oauth-icon">
+                <img src="/images/icons/facebook.svg" alt="Facebook">
+              </span>
+              <span class="oauth-label">Continuer avec Facebook</span>
+            </a>
+            <a href="/auth/twitter" class="oauth-btn oauth-twitter">
+              <span class="oauth-icon">
+                <img src="/images/icons/twitter.svg" alt="Twitter">
+              </span>
+              <span class="oauth-label">Continuer avec Twitter</span>
+            </a>
+        </div>
           
         <div class="switch-auth">
           Pas encore inscrit ? <a href="/auth/register">Créer un compte</a>
