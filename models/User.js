@@ -107,18 +107,19 @@ export class User {
   static async createQuestionnaire(userId, questionnaireData) {
     const connection = await pool.getConnection();
     try {
-      const { cookingLevel, dietaryPreferences, allergies, utensils } = questionnaireData;
+      const { cookingLevel, dietaryPreferences, allergies, utensils, whyJoin } = questionnaireData;
       
       const [result] = await connection.execute(
         `INSERT INTO user_questionnaire 
-        (user_id, cooking_level, dietary_preferences, allergies, utensils) 
-        VALUES (?, ?, ?, ?, ?)`,
+        (user_id, cooking_level, dietary_preferences, allergies, utensils, why_join) 
+        VALUES (?, ?, ?, ?, ?, ?)`,
         [
           userId,
           cookingLevel,
           JSON.stringify(dietaryPreferences),
           JSON.stringify(allergies),
-          JSON.stringify(utensils)
+          JSON.stringify(utensils),
+          whyJoin
         ]
       );
 
@@ -144,20 +145,22 @@ export class User {
   static async updateQuestionnaire(userId, questionnaireData) {
     const connection = await pool.getConnection();
     try {
-      const { cookingLevel, dietaryPreferences, allergies, utensils } = questionnaireData;
+      const { cookingLevel, dietaryPreferences, allergies, utensils, whyJoin } = questionnaireData;
       
       const [result] = await connection.execute(
         `UPDATE user_questionnaire 
         SET cooking_level = ?, 
             dietary_preferences = ?, 
             allergies = ?, 
-            utensils = ? 
+            utensils = ?, 
+            why_join = ?
         WHERE user_id = ?`,
         [
           cookingLevel,
           JSON.stringify(dietaryPreferences),
           JSON.stringify(allergies),
           JSON.stringify(utensils),
+          whyJoin,
           userId
         ]
       );

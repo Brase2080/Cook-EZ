@@ -72,6 +72,11 @@
             </div>
           </div>
 
+          <div class="form-group">
+            <label for="whyJoin">Pourquoi rejoignez-vous Cook-EZ ? (Facultatif)</label>
+            <textarea id="whyJoin" name="whyJoin" rows="4"></textarea>
+          </div>
+
           <button class="btn" type="submit">Enregistrer mes préférences</button>
         </form>
       </div>
@@ -87,7 +92,8 @@
         cookingLevel: parseInt(document.getElementById('cookingLevel').value),
         dietaryPreferences: document.getElementById('dietaryPreferences').value,
         utensils: Array.from(document.querySelectorAll('input[name="utensils"]:checked')).map(cb => cb.value),
-        allergies: Array.from(document.querySelectorAll('input[name="allergies"]:checked')).map(cb => cb.value)
+        allergies: Array.from(document.querySelectorAll('input[name="allergies"]:checked')).map(cb => cb.value),
+        whyJoin: document.getElementById('whyJoin').value
       };
 
       try {

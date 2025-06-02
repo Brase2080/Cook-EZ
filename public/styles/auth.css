@@ -204,15 +204,19 @@ body {
   }
   
   .oauth-buttons {
+    width: 80%;
     display: flex;
+    justify-content: center;
     flex-direction: column;
-    gap: 1rem;
-    margin: 2rem 0 1rem 0;
+    gap: 15px;
+    margin: 20px auto;
+    align-items: center;
   }
   
   .oauth-btn {
     width: 100%;
     display: flex;
+    justify-content: center;
     align-items: center;
     background: #fff;
     border: 1.5px solid #e5e7eb;
