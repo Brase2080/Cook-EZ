@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.js';
 import { securityHeaders, generalLimiter } from './middleware/security.js';
 import { authenticateToken } from './middleware/auth.js';
 import dashboardRoutes from './routes/dashboard.js';
+import questionnaireRoutes from './routes/questionnaire.js';
 
 dotenv.config();
 
@@ -66,6 +67,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
+app.use('/questionnaire', questionnaireRoutes);
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);

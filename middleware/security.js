@@ -37,8 +37,10 @@ export const generalLimiter = rateLimit({
 export const validateRegistration = [
   body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('name').trim().isLength({ min: 2, max: 50 }).withMessage('Name is required and must be between 2 and 50 characters'),
   body('confirmPassword').custom((value, { req }) => {
+    if (!value) {
+      throw new Error('Please confirm your password');
+    }
     if (value !== req.body.password) {
       throw new Error('Passwords do not match');
     }

@@ -47,7 +47,8 @@ passport.use(new LocalStrategy({
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: '/auth/google/callback'
+  callbackURL: `${process.env.BASE_URL || 'http://localhost:3000'}/auth/google/callback`,
+  scope: ['profile', 'email']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findByOAuthId('google', profile.id);
@@ -64,17 +65,18 @@ passport.use(new GoogleStrategy({
       return done(null, existingUser);
     }
 
-    user = await User.create({
+    const newUser = await User.create({
       email: profile.emails[0].value,
-      firstName: profile.name.givenName,
-      lastName: profile.name.familyName,
       googleId: profile.id,
-      profilePicture: profile.photos[0]?.value
+      name: profile.displayName || profile.name?.givenName + ' ' + profile.name?.familyName,
+      profilePicture: profile.photos?.[0]?.value || null,
+      emailVerified: true
     });
 
-    return done(null, user);
+    return done(null, newUser);
   } catch (error) {
-    return done(error);
+    console.error('Google OAuth error:', error);
+    return done(error, null);
   }
 }));
 

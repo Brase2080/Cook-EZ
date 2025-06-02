@@ -5,15 +5,14 @@ export class User {
   static async create(userData) {
     const connection = await pool.getConnection();
     try {
-      const { email, password, name, googleId, facebookId, twitterId, profilePicture } = userData;
+      const { email, password, googleId, facebookId, twitterId, profilePicture } = userData;
       
       const [result] = await connection.execute(
-        `INSERT INTO users (email, password, name, google_id, facebook_id, twitter_id, profile_picture, email_verified) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO users (email, password, google_id, facebook_id, twitter_id, profile_picture, email_verified) 
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           email,
           password,
-          name,
           googleId || null,
           facebookId || null,
           twitterId || null,
@@ -31,6 +30,9 @@ export class User {
   static async findById(id) {
     const connection = await pool.getConnection();
     try {
+      if (!id) {
+        return null;
+      }
       const [rows] = await connection.execute(
         'SELECT id, email, password, name, google_id, facebook_id, twitter_id, profile_picture, email_verified, is_active, created_at FROM users WHERE id = ? AND is_active = TRUE',
         [id]
@@ -100,5 +102,82 @@ export class User {
       'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
       [userId]
     );
+  }
+
+  static async createQuestionnaire(userId, questionnaireData) {
+    const connection = await pool.getConnection();
+    try {
+      const { cookingLevel, dietaryPreferences, allergies, utensils } = questionnaireData;
+      
+      const [result] = await connection.execute(
+        `INSERT INTO user_questionnaire 
+        (user_id, cooking_level, dietary_preferences, allergies, utensils) 
+        VALUES (?, ?, ?, ?, ?)`,
+        [
+          userId,
+          cookingLevel,
+          JSON.stringify(dietaryPreferences),
+          JSON.stringify(allergies),
+          JSON.stringify(utensils)
+        ]
+      );
+
+      return result.insertId;
+    } finally {
+      connection.release();
+    }
+  }
+
+  static async getQuestionnaire(userId) {
+    const connection = await pool.getConnection();
+    try {
+      const [rows] = await connection.execute(
+        'SELECT * FROM user_questionnaire WHERE user_id = ?',
+        [userId]
+      );
+      return rows[0] || null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  static async updateQuestionnaire(userId, questionnaireData) {
+    const connection = await pool.getConnection();
+    try {
+      const { cookingLevel, dietaryPreferences, allergies, utensils } = questionnaireData;
+      
+      const [result] = await connection.execute(
+        `UPDATE user_questionnaire 
+        SET cooking_level = ?, 
+            dietary_preferences = ?, 
+            allergies = ?, 
+            utensils = ? 
+        WHERE user_id = ?`,
+        [
+          cookingLevel,
+          JSON.stringify(dietaryPreferences),
+          JSON.stringify(allergies),
+          JSON.stringify(utensils),
+          userId
+        ]
+      );
+
+      return result.affectedRows > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  static async updateName(userId, name) {
+    const connection = await pool.getConnection();
+    try {
+      await connection.execute(
+        'UPDATE users SET name = ? WHERE id = ?',
+        [name, userId]
+      );
+      return true;
+    } finally {
+      connection.release();
+    }
   }
 }

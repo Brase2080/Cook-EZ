@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Questionnaire - Cook-EZ</title>
+  <link rel="stylesheet" href="/styles/auth.css">
+</head>
+<body>
+  <div class="container">
+    <div class="form-side">
+      <div class="branding">
+        <h1>Cook-EZ</h1>
+        <p>Personnalisons votre expérience culinaire</p>
+      </div>
+      <div class="auth-card">
+        <h2>Questionnaire de préférences</h2>
+        <form method="POST" action="/questionnaire/submit" id="questionnaireForm">
+          <div class="form-group">
+            <label for="name">Votre nom</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="cookingLevel">Niveau en cuisine</label>
+            <select id="cookingLevel" name="cookingLevel" required>
+              <option value="1">Débutant</option>
+              <option value="2">Intermédiaire débutant</option>
+              <option value="3">Intermédiaire</option>
+              <option value="4">Intermédiaire avancé</option>
+              <option value="5">Expert</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="dietaryPreferences">Régime alimentaire</label>
+            <select id="dietaryPreferences" name="dietaryPreferences" required>
+              <option value="omnivore">Omnivore</option>
+              <option value="vegetarian">Végétarien</option>
+              <option value="vegan">Végétalien</option>
+              <option value="pescatarian">Pescétarien</option>
+              <option value="gluten-free">Sans gluten</option>
+              <option value="halal">Halal</option>
+              <option value="kosher">Casher</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="utensils">Ustensiles de cuisine disponibles</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="utensils" value="fridge"> Réfrigérateur</label>
+              <label><input type="checkbox" name="utensils" value="oven"> Four</label>
+              <label><input type="checkbox" name="utensils" value="microwave"> Micro-ondes</label>
+              <label><input type="checkbox" name="utensils" value="stove"> Cuisinière</label>
+              <label><input type="checkbox" name="utensils" value="blender"> Mixeur</label>
+              <label><input type="checkbox" name="utensils" value="food-processor"> Robot culinaire</label>
+              <label><input type="checkbox" name="utensils" value="slow-cooker"> Cuiseur lent</label>
+              <label><input type="checkbox" name="utensils" value="pressure-cooker"> Cocotte-minute</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="allergies">Allergies et préférences alimentaires</label>
+            <div class="checkbox-group">
+              <label><input type="checkbox" name="allergies" value="nuts"> Noix</label>
+              <label><input type="checkbox" name="allergies" value="shellfish"> Fruits de mer</label>
+              <label><input type="checkbox" name="allergies" value="dairy"> Produits laitiers</label>
+              <label><input type="checkbox" name="allergies" value="eggs"> Œufs</label>
+              <label><input type="checkbox" name="allergies" value="soy"> Soja</label>
+              <label><input type="checkbox" name="allergies" value="wheat"> Blé</label>
+              <label><input type="checkbox" name="allergies" value="fish"> Poisson</label>
+              <label><input type="checkbox" name="allergies" value="spicy"> Épices fortes</label>
+            </div>
+          </div>
+
+          <button class="btn" type="submit">Enregistrer mes préférences</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('questionnaireForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value,
+        cookingLevel: parseInt(document.getElementById('cookingLevel').value),
+        dietaryPreferences: document.getElementById('dietaryPreferences').value,
+        utensils: Array.from(document.querySelectorAll('input[name="utensils"]:checked')).map(cb => cb.value),
+        allergies: Array.from(document.querySelectorAll('input[name="allergies"]:checked')).map(cb => cb.value)
+      };
+
+      try {
+        const response = await fetch('/questionnaire/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          window.location.href = '/dashboard';
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Une erreur est survenue');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Une erreur est survenue');
+      }
+    });
+  </script>
+</body>
+</html> 

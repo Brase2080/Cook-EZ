@@ -84,7 +84,13 @@ export const authenticateToken = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log('Token decoded:', decoded);
         
-        const user = await User.findById(decoded.id);
+        if (!decoded || !decoded.userId) {
+            console.log('Invalid token format, clearing token and redirecting to login');
+            res.clearCookie('token');
+            return res.redirect('/auth/login');
+        }
+
+        const user = await User.findById(decoded.userId);
         console.log('User found:', user ? 'Yes' : 'No');
 
         if (!user) {
@@ -103,7 +109,7 @@ export const authenticateToken = async (req, res, next) => {
 };
 
 export const isAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
+    if (req.cookies.token) {
         return res.redirect('/dashboard');
     }
     next();

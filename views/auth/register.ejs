@@ -1,195 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Cook-EZ</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <title>Inscription - Cook-EZ</title>
+  <link rel="stylesheet" href="/styles/auth.css">
 </head>
 <body>
-    <nav class="nav">
-        <div class="container nav-content">
-            <a href="/" class="nav-title">Cook-EZ</a>
-            <div class="nav-links">
-                <a href="/auth/login" class="nav-link">Login</a>
-                <a href="/auth/register" class="nav-link">Register</a>
-            </div>
+  <div class="container">
+    <div class="svg-side">
+        <div class="svg-container">
+          <svg viewBox="0 0 1044 1080" fill="none" xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMinYMin slice" class="svg-mask">
+            <defs>
+              <clipPath id="video-shape">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M485.727 -54.1589C609.204 -30.9496 754.696 -18.7059 842.734 63.3081C931.763 146.246 899.138 261.787 933.08 362.585C962.845 450.976 1019.01 534.931 1031.37 623.498C1044.92 720.537 1056.99 822.526 1008.52 902.977C959.239 984.794 858.326 1033.08 759.156 1075.4C660.157 1117.65 549.249 1140.38 431.717 1149.14C307.208 1158.43 176.694 1171.73 51.4349 1128.17C-74.3489 1084.43 -161.65 985.612 -264.039 907.174C-371.668 824.722 -518.124 760.251 -569.88 652.195C-621.664 544.081 -559.365 440.121 -537.604 336.027C-517.721 240.918 -520.976 133.221 -446.949 64.155C-374.15 -3.76493 -247.493 -15.7635 -135.498 -39.1296C-38.6674 -59.332 62.7533 -61.3072 166.417 -63.8151C272.93 -66.392 376.95 -74.605 485.727 -54.1589Z" />
+              </clipPath>
+            </defs>
+            <foreignObject x="0" y="0" width="1044" height="1080" clip-path="url(#video-shape)">
+              <video autoplay loop muted playsinline width="1044" height="1080" style="object-fit:cover;width:100%;height:100%;">
+                <source src="/video.mov" type="video/mp4" />
+                Votre navigateur ne supporte pas la vidéo.
+              </video>
+            </foreignObject>
+          </svg>
         </div>
-    </nav>
-
-    <main class="main">
-        <div class="auth-container">
-            <h2>Register</h2>
-
-            <% if (error) { %>
-                <div class="alert alert-danger"><%= error %></div>
-            <% } %>
-
-            <% if (success) { %>
-                <div class="alert alert-success"><%= success %></div>
-            <% } %>
-
-            <form action="/auth/register" method="POST" class="auth-form">
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Register</button>
-            </form>
-
-            <div class="oauth-divider">
-                <span>or continue with</span>
-            </div>
-
-            <div class="oauth-buttons">
-                <a href="/auth/google" class="oauth-btn google">
-                    <img src="/images/google-icon.svg" alt="Google">
-                    Continue with Google
-                </a>
-                <a href="/auth/facebook" class="oauth-btn facebook">
-                    <img src="/images/facebook-icon.svg" alt="Facebook">
-                    Continue with Facebook
-                </a>
-                <a href="/auth/twitter" class="oauth-btn twitter">
-                    <img src="/images/twitter-icon.svg" alt="Twitter">
-                    Continue with Twitter
-                </a>
-            </div>
-
-            <div class="auth-links">
-                <a href="/auth/login">Already have an account? Login</a>
-            </div>
+      </div>      
+    <div class="form-side">
+      <div class="branding">
+        <h1>Cook-EZ</h1>
+        <p>Recettes personnalisées et suivi intelligent par IA</p>
+      </div>
+      <div class="auth-card">
+        <h2>Inscription</h2>
+        <form method="POST" action="/auth/register">
+          <div class="form-group">
+            <label for="email">Adresse e-mail</label>
+            <input type="email" id="email" name="email" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="password">Mot de passe</label>
+            <input type="password" id="password" name="password" required autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirmer le mot de passe</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password">
+          </div>
+          <button class="btn" type="submit">Créer mon compte</button>
+        </form>
+        <div class="oauth-buttons">
+            <a href="/auth/google" class="oauth-btn oauth-google">
+              <span class="oauth-icon">
+                <img src="/images/icons/google.svg" alt="Google">
+              </span>
+              <span class="oauth-label">Continuer avec Google</span>
+            </a>
+            <a href="/auth/facebook" class="oauth-btn oauth-facebook">
+              <span class="oauth-icon">
+                <img src="/images/icons/facebook.svg" alt="Facebook">
+              </span>
+              <span class="oauth-label">Continuer avec Facebook</span>
+            </a>
+            <a href="/auth/twitter" class="oauth-btn oauth-twitter">
+              <span class="oauth-icon">
+                <img src="/images/icons/twitter.svg" alt="Twitter">
+              </span>
+              <span class="oauth-label">Continuer avec Twitter</span>
+            </a>
+        </div>          
+        <div class="switch-auth">
+          Déjà inscrit ? <a href="/auth/login">Se connecter</a>
         </div>
-    </main>
-
-    <style>
-    .auth-container {
-        max-width: 400px;
-        margin: 2rem auto;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .auth-form {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-        margin-bottom: 1rem;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-
-    .form-group input {
-        width: 100%;
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-
-    .btn {
-        width: 100%;
-        padding: 0.75rem;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .oauth-divider {
-        text-align: center;
-        margin: 1.5rem 0;
-        position: relative;
-    }
-
-    .oauth-divider::before,
-    .oauth-divider::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 45%;
-        height: 1px;
-        background-color: #ddd;
-    }
-
-    .oauth-divider::before {
-        left: 0;
-    }
-
-    .oauth-divider::after {
-        right: 0;
-    }
-
-    .oauth-divider span {
-        background-color: white;
-        padding: 0 1rem;
-        color: #666;
-    }
-
-    .oauth-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .oauth-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.75rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        text-decoration: none;
-        color: #333;
-        transition: background-color 0.2s;
-    }
-
-    .oauth-btn:hover {
-        background-color: #f5f5f5;
-    }
-
-    .oauth-btn img {
-        width: 24px;
-        height: 24px;
-        margin-right: 0.5rem;
-    }
-
-    .auth-links {
-        margin-top: 1.5rem;
-        text-align: center;
-    }
-
-    .auth-links a {
-        display: block;
-        color: #007bff;
-        text-decoration: none;
-        margin: 0.5rem 0;
-    }
-
-    .auth-links a:hover {
-        text-decoration: underline;
-    }
-    </style>
-
+      </div>
+    </div>
+  </div>
 </body>
-</html> 
+</html>

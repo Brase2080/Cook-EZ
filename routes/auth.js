@@ -34,7 +34,7 @@ router.get('/register', isAuthenticated, (req, res) => {
 
 router.post('/register', authLimiter, validateRegistration, handleValidationErrors, async (req, res) => {
     try {
-        const { email, password, name } = req.body;
+        const { email, password } = req.body;
         console.log('Registration attempt for email:', email);
         
         const existingUser = await User.findByEmail(email);
@@ -50,8 +50,7 @@ router.post('/register', authLimiter, validateRegistration, handleValidationErro
 
         const user = await User.create({
             email,
-            password: hashedPassword,
-            name
+            password: hashedPassword
         });
 
         const token = jwt.sign(
@@ -66,8 +65,8 @@ router.post('/register', authLimiter, validateRegistration, handleValidationErro
             maxAge: 24 * 60 * 60 * 1000
         });
 
-        req.session.success = 'Registration successful! Welcome to Cook-EZ.';
-        res.redirect('/dashboard');
+        req.session.success = 'Registration successful! Please complete your profile.';
+        res.redirect('/questionnaire');
     } catch (error) {
         console.error('Registration error:', error);
         res.render('auth/register', {
@@ -142,16 +141,35 @@ router.get('/google/callback',
     failureRedirect: '/auth/login',
     failureFlash: 'Google authentication failed'
   }),
-  (req, res) => {
-    const token = generateToken(req.user);
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-    });
-    req.session.success = 'Login successful! Welcome back.';
-    res.redirect('/dashboard');
+  async (req, res) => {
+    try {
+      const token = jwt.sign(
+        { userId: req.user.id },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+      });
+
+      // Check if user has completed questionnaire
+      const questionnaire = await User.getQuestionnaire(req.user.id);
+      
+      if (!questionnaire) {
+        req.session.success = 'Connexion réussie ! Veuillez compléter votre profil.';
+        return res.redirect('/questionnaire');
+      }
+
+      req.session.success = 'Connexion réussie ! Bienvenue.';
+      res.redirect('/dashboard');
+    } catch (error) {
+      console.error('Google callback error:', error);
+      res.redirect('/auth/login');
+    }
   }
 );
 
