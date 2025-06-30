@@ -1,0 +1,663 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cook-ez-input",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "0bb4c898-ef59-4b20-a702-dfeeab3783b3",
+      "name": "Webhook Trigger1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        740,
+        2020
+      ],
+      "webhookId": "f61e3569-2f69-478a-81cf-4212e8ef03a3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nlet extractedText = 'Here is audio transcription: ';\nif (response.text) {\n  extractedText += response.text;\n}\nreturn [{ json: { extracted_text: extractedText, processing_type: 'voice' } }];"
+      },
+      "id": "a438182e-48ef-4601-9e4f-f6d6aa3e6f2e",
+      "name": "Process Speech Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2180,
+        1840
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://world.openfoodfacts.org/api/v0/product/{{ $json.body.barcode }}.json",
+        "options": {}
+      },
+      "id": "ee83dd0a-c79b-4d8c-8bae-19bdba918af2",
+      "name": "OpenFoodFacts API1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1980,
+        2360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json.content;\nlet extractedText = 'Here is a photo transcription: ';\nif (response) {\n  extractedText += response;\n}\nreturn [{ json: { extracted_text: extractedText, processing_type: 'photo' } }];"
+      },
+      "id": "756713cf-c71d-42a6-9270-6effb01eebcf",
+      "name": "Process Vision Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2180,
+        2180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4.1-nano"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [\n  {\n    \"role\": \"system\",\n    \"content\": \"Tu es un assistant spécialisé dans l'analyse d'aliments. À partir du texte fourni, génère une liste JSON d'aliments avec les champs suivants : nom (string), quantite (number), unite (texte parmi : g, L, unit, ml, portion), categorie (texte parmi : milk, meat-fish, legumin-nut-seed, cereal, fruit, vegetable, fat, drink, sauce, spices, meal), dlc nombre de jour avant expiration, calories (estimation pour 100g). Si dlc n'est pas précisée, estime-la automatiquement avec les valeurs moyennes\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": $json.extracted_text\n  }\n]}}"
+            },
+            {
+              "name": "temperature",
+              "value": 0.3
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6b67a962-9aa7-40df-88ff-d8a05c92a2d6",
+      "name": "AI Structuration1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2460,
+        1940
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "rzyXNAxIC1QqoJhQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nlet foods = [];\n\ntry {\n  const aiResponse = JSON.parse(response.choices[0].message.content);\n  foods = Array.isArray(aiResponse) ? aiResponse : [aiResponse];\n} catch (error) {\n  return [{ json: { error: 'Failed to parse AI response', details: error.message } }];\n}\n\n// Fonction pour mapper les unités vers des nombres\nconst mapUnite = (unite) => {\n  const normalized = unite?.toLowerCase();\n  const mapping = {\n    'g': 1,\n    'grammes': 1,\n    'gramme': 1,\n    'gr': 1,\n    'l': 2,\n    'litres': 2,\n    'litre': 2,\n    'unit': 3,\n    'unités': 3,\n    'unité': 3,\n    'pièce': 3,\n    'pièces': 3,\n    'ml': 4,\n    'millilitres': 4,\n    'millilitre': 4,\n    'portion': 5,\n    'portions': 5\n  };\n  return mapping[normalized] || 3; // défaut: unit\n};\n\n// Fonction pour mapper les catégories vers des nombres\nconst mapCategorie = (categorie) => {\n  const normalized = categorie?.toLowerCase();\n  const mapping = {\n    'milk': 1,\n    'lait': 1,\n    'lait et produits laitiers': 1,\n    'produits laitiers': 1,\n    'meat-fish': 2,\n    'viande': 2,\n    'viandes': 2,\n    'poisson': 2,\n    'poissons': 2,\n    'viandes volailles poissons': 2,\n    'legumin-nut-seed': 3,\n    'légumineuses': 3,\n    'noix': 3,\n    'graines': 3,\n    'légumineuses noix graines': 3,\n    'cereal': 4,\n    'céréales': 4,\n    'produits céréaliers': 4,\n    'fruit': 5,\n    'fruits': 5,\n    'vegetable': 6,\n    'légumes': 6,\n    'fat': 7,\n    'matières grasses': 7,\n    'huiles': 7,\n    'matières grasses huiles œufs': 7,\n    'drink': 8,\n    'boissons': 8,\n    'sucres boissons': 8,\n    'sauce': 9,\n    'sauces': 9,\n    'spices': 10,\n    'épices': 10,\n    'meal': 11,\n    'repas': 11\n  };\n  return mapping[normalized] || 6; // défaut: légumes\n};\n\nconst processedFoods = foods.map(food => ({\n  nom: food.nom || '',\n  quantite: Number(food.quantite) || 1,\n  unite: mapUnite(food.unite),\n  categorie: mapCategorie(food.categorie),\n  expiration: Number(food.dlc) || 7,\n  calories: Number(food.calories) || 0,\n  date_ajout: new Date().toISOString().split('T')[0]\n}));\n\nreturn processedFoods.map(food => ({ json: food }));\n"
+      },
+      "id": "73b07286-58bd-4054-902d-fbf3d4989138",
+      "name": "Mapping and Processing1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        1940
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nlet success = false;\nlet addedItems = 0;\n\nitems.forEach((item) => {\n  if (item?.json?.data?.affectedRows > 0) {\n    success = true;\n    addedItems += item?.json?.data?.affectedRows;\n  }\n});\n\nconst message = success\n  ? `Cook-EZ: Successfully added ${addedItems} items`\n  : `Cook-EZ: Error occurred`;\n\nreturn { message };\n"
+      },
+      "id": "1c87156c-b226-4077-95c2-f85eb4313289",
+      "name": "Prepare Notification1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3380,
+        1940
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "9b4a70f5-8b0e-478f-b49b-6fcbf1ac00ed",
+      "name": "Webhook Response1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        3600,
+        1940
+      ]
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "inventaire_aliments",
+          "mode": "list",
+          "cachedResultName": "inventaire_aliments"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "nom",
+              "value": "={{ $json.nom }}"
+            },
+            {
+              "column": "quantite",
+              "value": "={{ $json.quantite }}"
+            },
+            {
+              "column": "unite",
+              "value": "={{ $json.unite }}"
+            },
+            {
+              "column": "categorie",
+              "value": "={{ $json.categorie }}"
+            },
+            {
+              "column": "dlc",
+              "value": "={{ $json.expiration }}"
+            },
+            {
+              "column": "calories",
+              "value": "={{ $json.calories }}"
+            },
+            {
+              "column": "date_ajout",
+              "value": "={{ $json.date_ajout }}"
+            }
+          ]
+        },
+        "options": {
+          "detailedOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        3100,
+        1940
+      ],
+      "id": "645be46a-01e4-4f90-941a-7802b8e30548",
+      "name": "MySQL1",
+      "credentials": {
+        "mySql": {
+          "id": "3mVdwGoWPyKOz91Q",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6869afe2-a8df-45c7-a343-a9ed282eff8b",
+              "leftValue": "={{ $json.body.input_type }}",
+              "rightValue": "barcode",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1020,
+        2020
+      ],
+      "id": "e9d91e8f-0d86-4e49-822d-c7047f2c3714",
+      "name": "Is barcode1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mapping OpenFoodFacts -> DB fields\nconst response = $input.first().json;\nif(response.status !== 1 || !response.product) {\n  return [{json: {error: 'Produit non trouvé'}}];\n}\nconst p = response.product;\n\n// Mapping catégorie\nconst catMap = {\n  'lait et produits laitiers': 1,\n  'viandes volailles poissons': 2,\n  'légumineuses noix graines': 3,\n  'produits céréaliers': 4,\n  'fruits': 5,\n  'légumes': 6,\n  'matières grasses huiles œufs': 7,\n  'sucres boissons': 8\n};\n\n// Mapping unité\nconst unitMap = {\n  'g': 1, 'grammes': 1, 'gramme': 1,\n  'l': 2, 'litres': 2, 'litre': 2,\n  'ml': 4, 'millilitres': 4, 'millilitre': 4,\n  'unit': 3, 'unité': 3, 'pièce': 3,\n  'portion': 5, 'portions': 5\n};\n\nconst nom = p.product_name || '';\nconst quantite = parseFloat((p.quantity || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 1;\nconst unite = unitMap[(p.quantity || '').replace(/[^a-zA-Z]/g, '').toLowerCase()] || 3;\nconst categorie = catMap[(p.categories_tags && p.categories_tags[0] || '').replace('en:', '').replace(/-/g, ' ')] || 6;\nconst expiration = -1;\nconst calories = p.nutriments && (p.nutriments['energy-kcal_100g'] || p.nutriments['energy-kcal']) ? Math.round(p.nutriments['energy-kcal_100g'] || p.nutriments['energy-kcal']) : 0;\n\nreturn [{\n  json: {\n    nom,\n    quantite,\n    unite,\n    categorie,\n    expiration,\n    calories,\n    date_ajout: new Date().toISOString().split('T')[0]\n  }\n}];"
+      },
+      "name": "Barcode Mapping1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2180,
+        2360
+      ],
+      "id": "c43984fe-33d7-4782-8317-42da51ba4f8c"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.input_type }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "text"
+            },
+            {
+              "value2": "voice",
+              "output": 1
+            },
+            {
+              "value2": "ocr",
+              "output": 2
+            },
+            {
+              "value2": "photo",
+              "output": 3
+            }
+          ]
+        }
+      },
+      "id": "5eadd64a-aade-419b-af72-ab7ba6953741",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        1980
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "language": "fr"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2000,
+        1840
+      ],
+      "id": "6e8dfc6f-5d5d-4ccf-8a84-4fe3e975c778",
+      "name": "Speech-To-Text",
+      "credentials": {
+        "openAiApi": {
+          "id": "rzyXNAxIC1QqoJhQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { extracted_text: $input.first().json.body.text_data, processing_type: 'text' } }];"
+      },
+      "id": "2129b2ef-4fde-4c47-bf3e-f3bd6c1f3896",
+      "name": "Text Process",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        1680
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.mistral.ai/v1/ocr",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mistralCloudApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"model\": \"mistral-ocr-latest\",\n    \"document\": {\n        \"type\": \"image_url\",\n        \"image_url\": \"data:image/jpeg;base64,{{ $json.body.image_data }}\"\n    },\n    \"include_image_base64\": true\n}",
+        "options": {}
+      },
+      "id": "c3a3d165-5551-4c1a-940c-dc46b6fc1b9a",
+      "name": "Mistral OCR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1980,
+        2020
+      ],
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "oCHl8BpbP1tQ7Rgs",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json.pages[0];\nlet extractedText = 'Here is the OCR of the purchase ticket, make sure to handle nutrition articles only:';\nif (response.markdown) {\n  extractedText += response.markdown;\n}\nreturn [{ json: { extracted_text: extractedText, processing_type: 'ocr' } }];"
+      },
+      "id": "e1e25ed7-ad5d-4e78-9248-6bf79d131b46",
+      "name": "Process OCR Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2180,
+        2020
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "text": "Here is a photo of alimentary products, make the list of all visible ingredients that you can determine, estimate the quantity, if the aliment can't be identified don't put it, result in french, only result",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1980,
+        2180
+      ],
+      "id": "d49508e3-7d6f-4413-9559-0c2ac500fbd8",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "rzyXNAxIC1QqoJhQ",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "body.image_data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1820,
+        2180
+      ],
+      "id": "420b9474-dbfb-47d5-b335-804a2384accf",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convert base64 audio data to binary\nconst audioData = $input.first().json.body.audio_data;\n\n// Remove data URL prefix if present (e.g., \"data:audio/wav;base64,\")\nconst base64Data = audioData.replace(/^data:audio\\/[a-z]+;base64,/, '');\n\nreturn [{\n  binary: {\n    data: {\n      data: base64Data,\n      mimeType: 'audio/wav', // Adjust based on your audio format\n      fileName: 'audio.wav',\n      fileExtension: 'wav'\n    }\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        1840
+      ],
+      "id": "82dd8ce4-37aa-413d-a8ec-49e906e22fc9",
+      "name": "Convert to file"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Is barcode1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Speech Response1": {
+      "main": [
+        [
+          {
+            "node": "AI Structuration1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenFoodFacts API1": {
+      "main": [
+        [
+          {
+            "node": "Barcode Mapping1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Vision Response1": {
+      "main": [
+        [
+          {
+            "node": "AI Structuration1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Structuration1": {
+      "main": [
+        [
+          {
+            "node": "Mapping and Processing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mapping and Processing1": {
+      "main": [
+        [
+          {
+            "node": "MySQL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Notification1": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Notification1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is barcode1": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenFoodFacts API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Barcode Mapping1": {
+      "main": [
+        [
+          {
+            "node": "MySQL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Text Process",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert to file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mistral OCR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Speech-To-Text": {
+      "main": [
+        [
+          {
+            "node": "Process Speech Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Process": {
+      "main": [
+        [
+          {
+            "node": "AI Structuration1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process OCR Response1": {
+      "main": [
+        [
+          {
+            "node": "AI Structuration1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mistral OCR": {
+      "main": [
+        [
+          {
+            "node": "Process OCR Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Process Vision Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to file": {
+      "main": [
+        [
+          {
+            "node": "Speech-To-Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d532d968-99cd-4b36-9c8d-6e1d427d58c3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8f347e04b3f910ac4e2ce18d73b7ec23cd81dfd1a22c129b0b3fa227c00f156c"
+  },
+  "id": "RDNTIGYFc3rj2WIH",
+  "tags": []
+}
