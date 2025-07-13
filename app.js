@@ -142,9 +142,61 @@ const structureWithAI = async (extractedText) => {
   }));
 };
 
-const saveToDatabase = async (foods) => {
-  return 0;
+// Modifier la fonction saveToDatabase dans app.js
+const saveToDatabase = async (foods, userId) => {
+  const connection = await pool.getConnection();
+  try {
+      let totalAffected = 0;
+      for (const food of foods) {
+          const [result] = await connection.execute(
+              'INSERT INTO inventaire_aliments (nom, quantite, unite, categorie, dlc, calories, date_ajout, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+              [food.nom, food.quantite, food.unite, food.categorie, food.expiration, food.calories, food.date_ajout, userId]
+          );
+          totalAffected += result.affectedRows;
+      }
+      return totalAffected;
+  } finally {
+      connection.release();
+  }
 };
+
+// Modifier la route POST
+app.post('/ingredients/add', authenticateToken, async (req, res) => {
+  try {
+      const { input_type, text_data, barcode, audio_data, image_data } = req.body;
+      let foods = [];
+
+      if (input_type === 'text') {
+          foods = await structureWithAI(text_data);
+      } else if (input_type === 'barcode') {
+          foods = await processBarcodeInput(barcode);
+      } else if (input_type === 'voice') {
+          throw new Error('Voice input not implemented yet');
+      } else if (input_type === 'ocr') {
+          throw new Error('OCR input not implemented yet');
+      } else if (input_type === 'photo') {
+          throw new Error('Photo input not implemented yet');
+      } else {
+          throw new Error('Invalid input_type');
+      }
+
+      const addedItems = await saveToDatabase(foods, req.user.id);
+      const successMsg = `Successfully added ${addedItems} items`;
+      
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+          return res.redirect(`/ingredients/view?success=${encodeURIComponent(successMsg)}`);
+      }
+      
+      res.json({ message: successMsg, items_added: addedItems });
+  } catch (error) {
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+          return res.redirect(`/ingredients/view?error=${encodeURIComponent(error.message)}`);
+      }
+      
+      res.status(500).json({ error: error.message });
+  }
+});
+
 
 const processBarcodeInput = async (barcode) => {
   const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
@@ -186,37 +238,6 @@ const processBarcodeInput = async (barcode) => {
   }];
 };
 
-
-app.post('/ingredients/add', async (req, res) => {
-  try {
-    const { input_type, text_data, barcode, audio_data, image_data } = req.body;
-    let foods = [];
-    if (input_type === 'text') {
-      foods = await structureWithAI(text_data);
-    } else if (input_type === 'barcode') {
-      foods = await processBarcodeInput(barcode);
-    } else if (input_type === 'voice') {
-      throw new Error('Voice input not implemented yet');
-    } else if (input_type === 'ocr') {
-      throw new Error('OCR input not implemented yet');
-    } else if (input_type === 'photo') {
-      throw new Error('Photo input not implemented yet');
-    } else {
-      throw new Error('Invalid input_type');
-    }
-    const addedItems = await saveToDatabase(foods);
-    const successMsg = `Successfully added ${addedItems} items`;
-    if (req.headers.accept && req.headers.accept.includes('text/html')) {
-      return res.redirect(`/ingredients/view?success=${encodeURIComponent(successMsg)}`);
-    }
-    res.json({ message: successMsg, items_added: addedItems });
-  } catch (error) {
-    if (req.headers.accept && req.headers.accept.includes('text/html')) {
-      return res.redirect(`/ingredients/view?error=${encodeURIComponent(error.message)}`);
-    }
-    res.status(500).json({ error: error.message });
-  }
-});
 
 app.use((err, req, res, next) => {
   console.error('Error:', err);

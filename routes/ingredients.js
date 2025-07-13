@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const router = express.Router();
+import { authenticateToken } from '../middleware/auth.js';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -81,22 +82,23 @@ const structureWithAI = async (extractedText) => {
   }));
 };
 
-const saveToDatabase = async (foods) => {
+const saveToDatabase = async (foods, userId) => {
   const connection = await pool.getConnection();
   try {
-    let totalAffected = 0;
-    for (const food of foods) {
-      const [result] = await connection.execute(
-        'INSERT INTO inventaire_aliments (nom, quantite, unite, categorie, dlc, calories, date_ajout) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [food.nom, food.quantite, food.unite, food.categorie, food.expiration, food.calories, food.date_ajout]
-      );
-      totalAffected += result.affectedRows;
-    }
-    return totalAffected;
+      let totalAffected = 0;
+      for (const food of foods) {
+          const [result] = await connection.execute(
+              'INSERT INTO inventaire_aliments (nom, quantite, unite, categorie, dlc, calories, date_ajout, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+              [food.nom, food.quantite, food.unite, food.categorie, food.expiration, food.calories, food.date_ajout, userId]
+          );
+          totalAffected += result.affectedRows;
+      }
+      return totalAffected;
   } finally {
-    connection.release();
+      connection.release();
   }
 };
+
 
 const processBarcodeInput = async (barcode) => {
   const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
@@ -204,38 +206,126 @@ const processPhotoInput = async (imageData) => {
   return response.choices[0].message.content;
 };
 
-router.get('/', async (req, res) => {
+// Route GET pour afficher les ingrédients
+router.get('/', authenticateToken, async (req, res) => {
   try {
-    const connection = await pool.getConnection();
-    const [rows] = await connection.execute('SELECT * FROM inventaire_aliments');
-    connection.release();
-    res.json(rows);
+      const connection = await pool.getConnection();
+      const [rows] = await connection.execute(
+          'SELECT * FROM inventaire_aliments WHERE user_id = ?', 
+          [req.user.id]
+      );
+      connection.release();
+      res.json(rows);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
   }
 });
 
-router.get('/view', async (req, res) => {
+// Route GET pour la vue des ingrédients
+router.get('/view', authenticateToken, async (req, res) => {
   try {
-    const connection = await pool.getConnection();
-    const [rows] = await connection.execute('SELECT * FROM inventaire_aliments');
-    connection.release();
-    res.render('ingredients', {
-      ingredients: rows,
+      const connection = await pool.getConnection();
+      const [rows] = await connection.execute(
+          'SELECT * FROM inventaire_aliments WHERE user_id = ?', 
+          [req.user.id]
+      );
+      connection.release();
+      res.render('ingredients', {
+          ingredients: rows,
+          error: req.query.error,
+          success: req.query.success
+      });
+  } catch (error) {
+      res.render('ingredients', { ingredients: [], error: error.message, success: null });
+  }
+});
+
+router.delete('/:id', authenticateToken, async (req, res) => {
+  try {
+      const connection = await pool.getConnection();
+      const [result] = await connection.execute(
+          'DELETE FROM inventaire_aliments WHERE id = ? AND user_id = ?',
+          [req.params.id, req.user.id]
+      );
+      connection.release();
+      
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Ingredient not found or not owned by user' });
+      }
+      
+      res.json({ message: 'Ingredient deleted successfully' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+router.put('/:id', authenticateToken, async (req, res) => {
+  try {
+      const { nom, quantite, unite, categorie, dlc, calories } = req.body;
+      const connection = await pool.getConnection();
+      const [result] = await connection.execute(
+          'UPDATE inventaire_aliments SET nom = ?, quantite = ?, unite = ?, categorie = ?, dlc = ?, calories = ? WHERE id = ? AND user_id = ?',
+          [nom, quantite, unite, categorie, dlc, calories, req.params.id, req.user.id]
+      );
+      connection.release();
+      
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Ingredient not found or not owned by user' });
+      }
+      
+      res.json({ message: 'Ingredient updated successfully' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// Route GET pour le formulaire d'ajout
+router.get('/add', authenticateToken, (req, res) => {
+  res.render('add-ingredient', {
       error: req.query.error,
       success: req.query.success
-    });
+  });
+});
+
+router.post('/add', authenticateToken, async (req, res) => {
+  try {
+      const { input_type, text_data, barcode, image_data } = req.body;
+      let foods = [];
+
+      if (input_type === 'text') {
+          foods = await structureWithAI(text_data);
+      } else if (input_type === 'barcode') {
+          foods = await processBarcodeInput(barcode);
+      } else if (input_type === 'ocr') {
+          if (!image_data) throw new Error('Aucune image fournie');
+          const extractedText = await processOCRInput(image_data);
+          foods = await structureWithAI('Here is the OCR of the purchase ticket, make sure to handle nutrition articles only: ' + extractedText);
+      } else if (input_type === 'photo') {
+          if (!image_data) throw new Error('Aucune image fournie');
+          const extractedText = await processPhotoInput(image_data);
+          foods = await structureWithAI('Here is a photo transcription: ' + extractedText);
+      } else {
+          throw new Error('Invalid input_type');
+      }
+
+      // Passer l'ID de l'utilisateur à la fonction saveToDatabase
+      const addedItems = await saveToDatabase(foods, req.user.id);
+      const successMsg = `Successfully added ${addedItems} items`;
+      
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+          return res.redirect(`/ingredients/add?success=${encodeURIComponent(successMsg)}`);
+      }
+      
+      res.json({ message: successMsg, items_added: addedItems });
   } catch (error) {
-    res.render('ingredients', { ingredients: [], error: error.message, success: null });
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+          return res.redirect(`/ingredients/add?error=${encodeURIComponent(error.message)}`);
+      }
+      
+      res.status(500).json({ error: error.message });
   }
 });
 
-router.get('/add', (req, res) => {
-  res.render('add-ingredient', {
-    error: req.query.error,
-    success: req.query.success
-  });
-});
 
 router.post('/add', async (req, res) => {
   try {
