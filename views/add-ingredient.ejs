@@ -40,34 +40,17 @@
     <button type="submit" id="sendOcr">Add by OCR</button>
     <span id="ocrStatus"></span>
   </form>
-  <script>
-    const ocrForm = document.getElementById('ocrForm');
-    const ocrImage = document.getElementById('ocrImage');
-    const ocrImageData = document.getElementById('ocr_image_data');
-    const ocrStatus = document.getElementById('ocrStatus');
-    ocrForm.onsubmit = function(e) {
-      if (!ocrImage.files[0]) {
-        ocrStatus.textContent = 'Please select an image.';
-        e.preventDefault();
-        return false;
-      }
-      const reader = new FileReader();
-      reader.onloadend = function() {
-        ocrImageData.value = reader.result.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
-        ocrForm.submit();
-      };
-      reader.readAsDataURL(ocrImage.files[0]);
-      e.preventDefault();
-      ocrStatus.textContent = 'Processing image...';
-      return false;
-    };
-  </script>
+  <script src="/js/ocr-upload.js"></script>
 
-  <h2>Add by Photo (coming soon)</h2>
-  <form>
-    <input type="text" placeholder="Photo input not yet implemented" disabled>
-    <button type="button" disabled>Add by Photo</button>
+  <h2>Add by Photo</h2>
+  <form id="photoForm" method="POST" action="/ingredients/add">
+    <input type="hidden" name="input_type" value="photo">
+    <input type="file" id="photoImage" accept="image/*" required>
+    <input type="hidden" name="image_data" id="photo_image_data">
+    <button type="submit" id="sendPhoto">Add by Photo</button>
+    <span id="photoStatus"></span>
   </form>
+  <script src="/js/photo-upload.js"></script>
 
   <p><a href="/ingredients/view">View Ingredients</a></p>
   <p><a href="/dashboard">Back to Dashboard</a></p>

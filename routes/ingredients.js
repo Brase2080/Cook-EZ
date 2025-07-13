@@ -159,7 +159,6 @@ const processVoiceInput = async (audioData) => {
 };
 
 const processOCRInput = async (imageData) => {
-  // Call Mistral OCR API
   const response = await axios.post(
     'https://api.mistral.ai/v1/ocr',
     {
@@ -182,7 +181,27 @@ const processOCRInput = async (imageData) => {
 };
 
 const processPhotoInput = async (imageData) => {
-  throw new Error('Photo input not implemented yet');
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: "Here is a photo of alimentary products, make the list of all visible ingredients that you can determine, estimate the quantity, if the aliment can't be identified don't put it, result in french, only result"
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:image/jpeg;base64,${imageData}`
+            }
+          }
+        ]
+      }
+    ]
+  });
+  return response.choices[0].message.content;
 };
 
 router.get('/', async (req, res) => {
@@ -231,7 +250,9 @@ router.post('/add', async (req, res) => {
       const extractedText = await processOCRInput(image_data);
       foods = await structureWithAI('Here is the OCR of the purchase ticket, make sure to handle nutrition articles only: ' + extractedText);
     } else if (input_type === 'photo') {
-      throw new Error('Photo input not implemented yet');
+      if (!image_data) throw new Error('Aucune image fournie');
+      const extractedText = await processPhotoInput(image_data);
+      foods = await structureWithAI('Here is a photo transcription: ' + extractedText);
     } else {
       throw new Error('Invalid input_type');
     }
