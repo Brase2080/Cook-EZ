@@ -262,10 +262,19 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
       const { nom, quantite, unite, categorie, dlc, calories } = req.body;
+      
+      let dlcDays = null;
+      if (dlc && dlc !== '') {
+          const today = new Date();
+          const expirationDate = new Date(dlc);
+          const diffTime = expirationDate.getTime() - today.getTime();
+          dlcDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      }
+      
       const connection = await pool.getConnection();
       const [result] = await connection.execute(
           'UPDATE inventaire_aliments SET nom = ?, quantite = ?, unite = ?, categorie = ?, dlc = ?, calories = ? WHERE id = ? AND user_id = ?',
-          [nom, quantite, unite, categorie, dlc, calories, req.params.id, req.user.id]
+          [nom, quantite, unite, categorie, dlcDays, calories, req.params.id, req.user.id]
       );
       connection.release();
       
@@ -323,40 +332,6 @@ router.post('/add', authenticateToken, async (req, res) => {
       }
       
       res.status(500).json({ error: error.message });
-  }
-});
-
-
-router.post('/add', async (req, res) => {
-  try {
-    const { input_type, text_data, barcode, image_data } = req.body;
-    let foods = [];
-    if (input_type === 'text') {
-      foods = await structureWithAI(text_data);
-    } else if (input_type === 'barcode') {
-      foods = await processBarcodeInput(barcode);
-    } else if (input_type === 'ocr') {
-      if (!image_data) throw new Error('Aucune image fournie');
-      const extractedText = await processOCRInput(image_data);
-      foods = await structureWithAI('Here is the OCR of the purchase ticket, make sure to handle nutrition articles only: ' + extractedText);
-    } else if (input_type === 'photo') {
-      if (!image_data) throw new Error('Aucune image fournie');
-      const extractedText = await processPhotoInput(image_data);
-      foods = await structureWithAI('Here is a photo transcription: ' + extractedText);
-    } else {
-      throw new Error('Invalid input_type');
-    }
-    const addedItems = await saveToDatabase(foods);
-    const successMsg = `Successfully added ${addedItems} items`;
-    if (req.headers.accept && req.headers.accept.includes('text/html')) {
-      return res.redirect(`/ingredients/add?success=${encodeURIComponent(successMsg)}`);
-    }
-    res.json({ message: successMsg, items_added: addedItems });
-  } catch (error) {
-    if (req.headers.accept && req.headers.accept.includes('text/html')) {
-      return res.redirect(`/ingredients/add?error=${encodeURIComponent(error.message)}`);
-    }
-    res.status(500).json({ error: error.message });
   }
 });
 

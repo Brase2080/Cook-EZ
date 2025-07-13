@@ -1,0 +1,520 @@
+body {
+    margin: 0;
+    background: #fdf1c6;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    color: #fa6175;
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.page-header p {
+    color: #4e5a6d;
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+@keyframes fadeInDown {
+    from { 
+        opacity: 0; 
+        transform: translateY(-30px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes popIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Cards */
+.card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.07);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    animation: popIn 0.8s cubic-bezier(.68,-0.55,.27,1.55);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    animation: slideIn 0.5s ease-out;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #4e9e60, #5cb85c);
+    color: white;
+    border-left: 4px solid #3d8b40;
+}
+
+.alert-error {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border-left: 4px solid #a93226;
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0; 
+        transform: translateX(-20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0); 
+    }
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(30,40,80,0.07);
+    margin: 0.5rem;
+}
+
+.btn-primary {
+    background: #fa6175;
+    color: white;
+    transform: all 0.2s;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05) translateY(-2px) ;
+    box-shadow: 0 4px 12px rgba(250, 97, 117, 0.15);
+}
+
+.btn-secondary {
+    background: #fff;
+    color: #fa6175;
+    border: 2px solid #fa6175;
+}
+
+.btn-secondary:hover {
+    transform: all 0.2s;
+    background: #fa6175;
+    color: white;
+    transform: scale(1.05) translateY(-2px) ;
+}
+
+.btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 80px;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-sm::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-sm:hover::before {
+    left: 100%;
+}
+
+.btn-edit {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: 1px solid #4CAF50;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, #45a049, #4CAF50);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    border-color: #45a049;
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+    border: 1px solid #f44336;
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, #d32f2f, #f44336);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+    border-color: #d32f2f;
+}
+
+.btn-sm:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.1s;
+}
+
+/* Styles pour les dates d'expiration */
+.expiration-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.expiring-soon {
+    animation: pulse 2s infinite;
+    font-size: 1.1em;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Table */
+.table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    background: white;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.modern-table th {
+    background: linear-gradient(135deg, #fa6175, #e85570);
+    color: white;
+    padding: 1.2rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modern-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.modern-table tr:hover {
+    background: #f8fafc;
+}
+
+.modern-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Form styles */
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #fa6175;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #faf9f6;
+    transition: border 0.2s;
+}
+
+.form-control:focus {
+    border-color: #fa6175;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(250, 97, 117, 0.1);
+}
+
+/* Input method buttons */
+.input-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.input-method {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.input-method:hover {
+    border-color: #fa6175;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.input-method.active {
+    border-color: #4e9e60;
+    background: #f0f9f0;
+}
+
+.input-method h3 {
+    color: #fa6175;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.input-method p {
+    color: #4e5a6d;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Modal pour la modification */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.modal-header h2 {
+    color: #fa6175;
+    margin: 0;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close:hover {
+    color: #fa6175;
+}
+
+/* Navigation */
+.nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    
+    .card {
+        padding: 1.5rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .input-methods {
+        grid-template-columns: 1fr;
+    }
+    
+    .modern-table {
+        font-size: 0.8rem;
+    }
+    
+    .modern-table th,
+    .modern-table td {
+        padding: 0.8rem 0.5rem;
+    }
+}
+
+/* Loading animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #fa6175;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Category badges */
+.category-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-fruits { background: #fff3cd; color: #856404; }
+.category-vegetables { background: #d4edda; color: #155724; }
+.category-dairy { background: #d1ecf1; color: #0c5460; }
+.category-meat { background: #f8d7da; color: #721c24; }
+.category-grains { background: #e2e3e5; color: #383d41; }
+.category-other { background: #f8f9fa; color: #6c757d; }
+
+
+.input-method {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    user-select: none; /* Prevent text selection */
+}
+
+.input-method:hover {
+    border-color: #fa6175;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.input-method:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.input-method.active {
+    border-color: #4e9e60;
+    background: #f0f9f0;
+    transform: translateY(-2px);
+}

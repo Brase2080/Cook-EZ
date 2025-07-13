@@ -1,66 +1,215 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>My Ingredients</title>
-  <link rel="stylesheet" href="/styles.css">
-  <style>
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #f4f4f4; }
-    form { margin-top: 2em; }
-    .error { color: red; }
-    .success { color: green; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Ingrédients</title>
+    <link rel="stylesheet" href="/styles/ingredients.css">
 </head>
 <body>
-  <h1>My Ingredients</h1>
-  <% if (typeof error !== 'undefined') { %>
-    <div class="error"><%= error %></div>
-  <% } %>
-  <% if (typeof success !== 'undefined') { %>
-    <div class="success"><%= success %></div>
-  <% } %>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Quantity</th>
-        <th>Unit</th>
-        <th>Category</th>
-        <th>Expiration</th>
-        <th>Calories</th>
-        <th>Date Added</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% ingredients.forEach(ingredient => { %>
-        <tr>
-          <td><%= ingredient.nom %></td>
-          <td><%= ingredient.quantite %></td>
-          <td><%= ingredient.unite %></td>
-          <td><%= ingredient.categorie %></td>
-          <td><%= ingredient.dlc ?? ingredient.expiration %></td>
-          <td><%= ingredient.calories %></td>
-          <td><%= ingredient.date_ajout %></td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+    <div class="container">
+        <div class="page-header">
+            <h1>Mes Ingrédients</h1>
+            <p>Gérez votre inventaire alimentaire personnel</p>
+        </div>
 
-  <h2>Add Ingredient</h2>
-  <form method="POST" action="/ingredients/add">
-    <input type="hidden" name="input_type" value="text">
-    <input type="text" name="text_data" placeholder="e.g. 2 pommes, 1L lait" required>
-    <button type="submit">Add by Text</button>
-  </form>
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error">
+                <strong>Erreur :</strong> <%= error %>
+            </div>
+        <% } %>
 
-  <h2>Add by Barcode</h2>
-  <form method="POST" action="/ingredients/add">
-    <input type="hidden" name="input_type" value="barcode">
-    <input type="text" name="barcode" placeholder="Barcode number" required>
-    <button type="submit">Add by Barcode</button>
-  </form>
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success">
+                <strong>Succès :</strong> <%= success %>
+            </div>
+        <% } %>
 
-  <p><a href="/dashboard">Back to Dashboard</a></p>
+        <div class="card">
+            <% if (ingredients && ingredients.length > 0) { %>
+                <div class="table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Quantité</th>
+                                <th>Unité</th>
+                                <th>Catégorie</th>
+                                <th>Expiration</th>
+                                <th>Calories</th>
+                                <th>Date d'ajout</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% ingredients.forEach(ingredient => { %>
+                                <% 
+                                const categoryNames = {
+                                    1: 'Lait et produits laitiers',
+                                    2: 'Viandes, volailles, poissons',
+                                    3: 'Légumineuses, noix, graines',
+                                    4: 'Céréales',
+                                    5: 'Fruits',
+                                    6: 'Légumes',
+                                    7: 'Matières grasses',
+                                    8: 'Boissons',
+                                    9: 'Sauces',
+                                    10: 'Épices',
+                                    11: 'Repas'
+                                };
+                                const categoryName = categoryNames[ingredient.categorie] || 'Autre';
+                                const categoryClass = categoryNames[ingredient.categorie] ? 
+                                    categoryNames[ingredient.categorie].toLowerCase().replace(/[^a-z]/g, '-') : 'other';
+                                
+                                const unitNames = {
+                                    1: 'g',
+                                    2: 'L',
+                                    3: 'unité',
+                                    4: 'ml',
+                                    5: 'portion'
+                                };
+                                const unitName = unitNames[ingredient.unite] || 'unité';
+                                %>
+                                <tr>
+                                    <td><strong><%= ingredient.nom %></strong></td>
+                                    <td><%= ingredient.quantite %></td>
+                                    <td><%= unitName %></td>
+                                    <td>
+                                        <span class="category-badge category-<%= categoryClass %>">
+                                            <%= categoryName %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% 
+                                        let expirationDate = 'Non définie';
+                                        let isExpiringSoon = false;
+                                        let expirationDateObj = null;
+                                        
+                                        if (ingredient.dlc && ingredient.dlc > 0 && ingredient.date_ajout) {
+                                            const addDate = new Date(ingredient.date_ajout);
+                                            addDate.setDate(addDate.getDate() + ingredient.dlc);
+                                            expirationDate = addDate.toLocaleDateString('fr-FR');
+                                            expirationDateObj = addDate;
+                                        } else if (ingredient.expiration && ingredient.expiration > 0 && ingredient.date_ajout) {
+                                            const addDate = new Date(ingredient.date_ajout);
+                                            addDate.setDate(addDate.getDate() + ingredient.expiration);
+                                            expirationDate = addDate.toLocaleDateString('fr-FR');
+                                            expirationDateObj = addDate;
+                                        }
+                                        
+                                        if (expirationDateObj) {
+                                            const today = new Date();
+                                            today.setHours(0, 0, 0, 0);
+                                            expirationDateObj.setHours(0, 0, 0, 0);
+                                            const diffTime = expirationDateObj.getTime() - today.getTime();
+                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                            isExpiringSoon = diffDays >= 0 && diffDays <= 3;
+                                        }
+                                        %>
+                                        <span class="expiration-cell">
+                                            <% if (isExpiringSoon) { %>
+                                                <span class="expiring-soon" title="Expire dans les 3 prochains jours">⚠️</span>
+                                            <% } %>
+                                            <%= expirationDate %>
+                                        </span>
+                                    </td>
+                                    <td><%= ingredient.calories || 'N/A' %></td>
+                                    <td><%= ingredient.date_ajout ? new Date(ingredient.date_ajout).toLocaleDateString('fr-FR') : 'N/A' %></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-sm btn-edit" 
+                                                    data-id="<%= ingredient.id %>"
+                                                    data-name="<%= ingredient.nom %>"
+                                                    data-quantity="<%= ingredient.quantite %>"
+                                                    data-unit="<%= unitName %>"
+                                                    data-category="<%= categoryName %>"
+                                                    data-dlc="<%= ingredient.dlc || ingredient.expiration || '' %>"
+                                                    data-calories="<%= ingredient.calories || '' %>"
+                                                    title="Modifier">
+                                                ✏️
+                                            </button>
+                                            <button class="btn-sm btn-delete" 
+                                                    data-id="<%= ingredient.id %>"
+                                                    data-name="<%= ingredient.nom %>"
+                                                    title="Supprimer">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div style="text-align: center; padding: 3rem; color: #4e5a6d;">
+                    <h3>Aucun ingrédient trouvé</h3>
+                    <p>Commencez par ajouter vos premiers ingrédients !</p>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="nav-links">
+            <a href="/ingredients/add" class="btn btn-primary">Ajouter des ingrédients</a>
+            <a href="/dashboard" class="btn btn-secondary">Retour au tableau de bord</a>
+        </div>
+    </div>
+
+    <!-- Modal de modification -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modifier l'ingrédient</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId" name="id">
+                
+                <div class="form-group">
+                    <label for="editNom">Nom :</label>
+                    <input type="text" id="editNom" name="nom" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editQuantite">Quantité :</label>
+                    <input type="number" id="editQuantite" name="quantite" class="form-control" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editUnite">Unité :</label>
+                    <input type="text" id="editUnite" name="unite" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editCategorie">Catégorie :</label>
+                    <select id="editCategorie" name="categorie" class="form-control">
+                        <option value="fruits">Fruits</option>
+                        <option value="vegetables">Légumes</option>
+                        <option value="dairy">Produits laitiers</option>
+                        <option value="meat">Viande</option>
+                        <option value="grains">Céréales</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDlc">Date d'expiration :</label>
+                    <input type="date" id="editDlc" name="dlc" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editCalories">Calories :</label>
+                    <input type="number" id="editCalories" name="calories" class="form-control">
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/ingredients-view.js"></script>
 </body>
-</html> 
+</html>

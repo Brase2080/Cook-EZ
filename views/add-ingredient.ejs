@@ -1,58 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-  <title>Add Ingredient</title>
-  <link rel="stylesheet" href="/styles.css">
-  <style>
-    form { margin-bottom: 2em; }
-    .error { color: red; }
-    .success { color: green; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter des Ingrédients</title>
+    <link rel="stylesheet" href="/styles/ingredients.css">
 </head>
 <body>
-  <h1>Add Ingredient</h1>
-  <% if (typeof error !== 'undefined' && error) { %>
-    <div class="error"><%= error %></div>
-  <% } %>
-  <% if (typeof success !== 'undefined' && success) { %>
-    <div class="success"><%= success %></div>
-  <% } %>
+    <div class="container">
+        <div class="page-header">
+            <h1>Ajouter des Ingrédients</h1>
+            <p>Choisissez votre méthode d'ajout préférée</p>
+        </div>
 
-  <h2>Add by Text</h2>
-  <form method="POST" action="/ingredients/add">
-    <input type="hidden" name="input_type" value="text">
-    <input type="text" name="text_data" placeholder="e.g. 2 pommes, 1L lait" required>
-    <button type="submit">Add by Text</button>
-  </form>
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-error">
+                <strong>Erreur :</strong> <%= error %>
+            </div>
+        <% } %>
 
-  <h2>Add by Barcode</h2>
-  <form method="POST" action="/ingredients/add">
-    <input type="hidden" name="input_type" value="barcode">
-    <input type="text" name="barcode" placeholder="Barcode number" required>
-    <button type="submit">Add by Barcode</button>
-  </form>
+        <% if (typeof success !== 'undefined' && success) { %>
+            <div class="alert alert-success">
+                <strong>Succès :</strong> <%= success %>
+            </div>
+        <% } %>
 
-  <h2>Add by OCR</h2>
-  <form id="ocrForm" method="POST" action="/ingredients/add">
-    <input type="hidden" name="input_type" value="ocr">
-    <input type="file" id="ocrImage" accept="image/*" required>
-    <input type="hidden" name="image_data" id="ocr_image_data">
-    <button type="submit" id="sendOcr">Add by OCR</button>
-    <span id="ocrStatus"></span>
-  </form>
-  <script src="/js/ocr-upload.js"></script>
+        <div class="card">
+            <div class="input-methods">
+                <div class="input-method" data-method="text">
+                    <h3>📝 Saisie Texte</h3>
+                    <p>Tapez directement vos ingrédients</p>
+                </div>
+                
+                <div class="input-method" data-method="barcode">
+                    <h3>📱 Code-barres</h3>
+                    <p>Scannez le code-barres d'un produit</p>
+                </div>
+                
+                <div class="input-method" data-method="ocr">
+                    <h3>📄 OCR Ticket</h3>
+                    <p>Photographiez votre ticket de caisse</p>
+                </div>
+                
+                <div class="input-method" data-method="photo">
+                    <h3>📸 Photo Produit</h3>
+                    <p>Prenez une photo de vos produits</p>
+                </div>
+            </div>
 
-  <h2>Add by Photo</h2>
-  <form id="photoForm" method="POST" action="/ingredients/add">
-    <input type="hidden" name="input_type" value="photo">
-    <input type="file" id="photoImage" accept="image/*" required>
-    <input type="hidden" name="image_data" id="photo_image_data">
-    <button type="submit" id="sendPhoto">Add by Photo</button>
-    <span id="photoStatus"></span>
-  </form>
-  <script src="/js/photo-upload.js"></script>
+            <form id="ingredientForm" method="POST" action="/ingredients/add" style="display: none;">
+                <input type="hidden" id="input_type" name="input_type" value="">
+                
+                <div id="text-input" class="form-group" style="display: none;">
+                    <label for="text_data">Saisissez vos ingrédients :</label>
+                    <textarea id="text_data" name="text_data" class="form-control" rows="4" 
+                              placeholder="Ex: 2 pommes, 500g de farine, 1L de lait..."></textarea>
+                </div>
+                
+                <div id="barcode-input" class="form-group" style="display: none;">
+                    <label for="barcode">Code-barres :</label>
+                    <input type="text" id="barcode" name="barcode" class="form-control" 
+                           placeholder="Scannez ou saisissez le code-barres">
+                </div>
+                
+                <div id="image-input" class="form-group" style="display: none;">
+                    <label for="image_data">Sélectionnez une image :</label>
+                    <input type="file" id="image_data" name="image_data" class="form-control" 
+                           accept="image/*" capture="camera">
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Ajouter les ingrédients</span>
+                        <span class="loading" style="display: none;"></span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="resetBtn">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
 
-  <p><a href="/ingredients/view">View Ingredients</a></p>
-  <p><a href="/dashboard">Back to Dashboard</a></p>
+        <div class="nav-links">
+            <a href="/ingredients/view" class="btn btn-secondary">Voir mes ingrédients</a>
+            <a href="/dashboard" class="btn btn-secondary">Retour au tableau de bord</a>
+        </div>
+    </div>
+
+    <script src="/js/add-ingredient.js"></script>
 </body>
-</html> 
+</html>
