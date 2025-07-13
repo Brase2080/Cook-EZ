@@ -43,74 +43,21 @@
                         </thead>
                         <tbody>
                             <% ingredients.forEach(ingredient => { %>
-                                <% 
-                                const categoryNames = {
-                                    1: 'Lait et produits laitiers',
-                                    2: 'Viandes, volailles, poissons',
-                                    3: 'Légumineuses, noix, graines',
-                                    4: 'Céréales',
-                                    5: 'Fruits',
-                                    6: 'Légumes',
-                                    7: 'Matières grasses',
-                                    8: 'Boissons',
-                                    9: 'Sauces',
-                                    10: 'Épices',
-                                    11: 'Repas'
-                                };
-                                const categoryName = categoryNames[ingredient.categorie] || 'Autre';
-                                const categoryClass = categoryNames[ingredient.categorie] ? 
-                                    categoryNames[ingredient.categorie].toLowerCase().replace(/[^a-z]/g, '-') : 'other';
-                                
-                                const unitNames = {
-                                    1: 'g',
-                                    2: 'L',
-                                    3: 'unité',
-                                    4: 'ml',
-                                    5: 'portion'
-                                };
-                                const unitName = unitNames[ingredient.unite] || 'unité';
-                                %>
                                 <tr>
                                     <td><strong><%= ingredient.nom %></strong></td>
                                     <td><%= ingredient.quantite %></td>
-                                    <td><%= unitName %></td>
+                                    <td><%= ingredient.unitName %></td>
                                     <td>
-                                        <span class="category-badge category-<%= categoryClass %>">
-                                            <%= categoryName %>
+                                        <span class="category-badge category-<%= ingredient.categoryClass %>">
+                                            <%= ingredient.categoryName %>
                                         </span>
                                     </td>
                                     <td>
-                                        <% 
-                                        let expirationDate = 'Non définie';
-                                        let isExpiringSoon = false;
-                                        let expirationDateObj = null;
-                                        
-                                        if (ingredient.dlc && ingredient.dlc > 0 && ingredient.date_ajout) {
-                                            const addDate = new Date(ingredient.date_ajout);
-                                            addDate.setDate(addDate.getDate() + ingredient.dlc);
-                                            expirationDate = addDate.toLocaleDateString('fr-FR');
-                                            expirationDateObj = addDate;
-                                        } else if (ingredient.expiration && ingredient.expiration > 0 && ingredient.date_ajout) {
-                                            const addDate = new Date(ingredient.date_ajout);
-                                            addDate.setDate(addDate.getDate() + ingredient.expiration);
-                                            expirationDate = addDate.toLocaleDateString('fr-FR');
-                                            expirationDateObj = addDate;
-                                        }
-                                        
-                                        if (expirationDateObj) {
-                                            const today = new Date();
-                                            today.setHours(0, 0, 0, 0);
-                                            expirationDateObj.setHours(0, 0, 0, 0);
-                                            const diffTime = expirationDateObj.getTime() - today.getTime();
-                                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                                            isExpiringSoon = diffDays >= 0 && diffDays <= 3;
-                                        }
-                                        %>
                                         <span class="expiration-cell">
-                                            <% if (isExpiringSoon) { %>
+                                            <% if (ingredient.isExpiringSoon) { %>
                                                 <span class="expiring-soon" title="Expire dans les 3 prochains jours">⚠️</span>
                                             <% } %>
-                                            <%= expirationDate %>
+                                            <%= ingredient.expirationDate %>
                                         </span>
                                     </td>
                                     <td><%= ingredient.calories || 'N/A' %></td>
@@ -121,8 +68,8 @@
                                                     data-id="<%= ingredient.id %>"
                                                     data-name="<%= ingredient.nom %>"
                                                     data-quantity="<%= ingredient.quantite %>"
-                                                    data-unit="<%= unitName %>"
-                                                    data-category="<%= categoryName %>"
+                                                    data-unit="<%= ingredient.unitName %>"
+                                                    data-category="<%= ingredient.categoryName %>"
                                                     data-dlc="<%= ingredient.dlc || ingredient.expiration || '' %>"
                                                     data-calories="<%= ingredient.calories || '' %>"
                                                     title="Modifier">

@@ -32,6 +32,11 @@
                     <p>Tapez directement vos ingrédients</p>
                 </div>
                 
+                <div class="input-method" data-method="voice">
+                    <h3>🎤 Reconnaissance Vocale</h3>
+                    <p>Dictez vos ingrédients à voix haute</p>
+                </div>
+                
                 <div class="input-method" data-method="barcode">
                     <h3>📱 Code-barres</h3>
                     <p>Scannez le code-barres d'un produit</p>
@@ -48,13 +53,33 @@
                 </div>
             </div>
 
-            <form id="ingredientForm" method="POST" action="/ingredients/add" style="display: none;">
+            <form id="ingredientForm" method="POST" action="/ingredients/add" enctype="multipart/form-data" style="display: none;">
                 <input type="hidden" id="input_type" name="input_type" value="">
                 
                 <div id="text-input" class="form-group" style="display: none;">
                     <label for="text_data">Saisissez vos ingrédients :</label>
                     <textarea id="text_data" name="text_data" class="form-control" rows="4" 
                               placeholder="Ex: 2 pommes, 500g de farine, 1L de lait..."></textarea>
+                </div>
+                
+                <div id="voice-input" class="form-group" style="display: none;">
+                    <label>Enregistrement vocal :</label>
+                    <div class="voice-controls">
+                        <button type="button" id="startRecording" class="btn btn-primary">
+                            🎤 Commencer l'enregistrement
+                        </button>
+                        <button type="button" id="stopRecording" class="btn btn-secondary" style="display: none;">
+                            ⏹️ Arrêter l'enregistrement
+                        </button>
+                        <div id="recordingStatus" class="recording-status" style="display: none;">
+                            <span class="recording-indicator">🔴</span> Enregistrement en cours...
+                        </div>
+                    </div>
+                    <input type="hidden" id="audio_data" name="audio_data" value="">
+                    <div id="transcriptionPreview" class="transcription-preview" style="display: none;">
+                        <label>Transcription :</label>
+                        <div id="transcriptionText"></div>
+                    </div>
                 </div>
                 
                 <div id="barcode-input" class="form-group" style="display: none;">
@@ -67,6 +92,7 @@
                     <label for="image_data">Sélectionnez une image :</label>
                     <input type="file" id="image_data" name="image_data" class="form-control" 
                            accept="image/*" capture="camera">
+                    <small class="form-text text-muted">Formats supportés: JPG, PNG, WEBP (max 10MB)</small>
                 </div>
                 
                 <div class="btn-group">
@@ -87,6 +113,7 @@
         </div>
     </div>
 
+    <!-- Script externe pour respecter la CSP -->
     <script src="/js/add-ingredient.js"></script>
 </body>
 </html>
