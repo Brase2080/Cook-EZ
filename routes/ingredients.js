@@ -1,83 +1,22 @@
 import express from 'express';
-import session from 'express-session';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import flash from 'connect-flash';
-import { initDatabase } from './config/database.js';
-import passport from './config/passport.js';
-import authRoutes from './routes/auth.js';
-import { securityHeaders, generalLimiter } from './middleware/security.js';
-import { authenticateToken } from './middleware/auth.js';
-import dashboardRoutes from './routes/dashboard.js';
-import questionnaireRoutes from './routes/questionnaire.js';
-import ingredientsRoutes from './routes/ingredients.js';
+import pool from '../config/database.js';
 import axios from 'axios';
+import multer from 'multer';
 import OpenAI from 'openai';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const router = express.Router();
 
-await initDatabase();
-
-app.use(securityHeaders);
-app.use(generalLimiter);
-app.use(cookieParser());
-
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-app.use(session({
-  secret: process.env.SESSION_SECRET || '',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
-  },
-  name: 'sessionId'
-}));
-
-app.use(flash());
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.set('view engine', 'ejs');
-app.set('views', './views');
-app.use(express.static('public'));
-
-app.get('/', (req, res) => {
-  if (req.isAuthenticated && req.isAuthenticated()) {
-    res.redirect('/dashboard');
-  } else if (req.cookies.token) {
-    res.redirect('/auth/login');
-  } else {
-    res.redirect('/auth/login');
-  }
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-app.get('/ingredients', (req, res) => {
-  res.redirect('/ingredients/view');
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
-
-app.use('/auth', authRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/questionnaire', questionnaireRoutes);
-app.use('/ingredients', ingredientsRoutes);
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const mapUnite = (unite) => {
   const normalized = unite?.toLowerCase();
@@ -143,7 +82,20 @@ const structureWithAI = async (extractedText) => {
 };
 
 const saveToDatabase = async (foods) => {
-  return 0;
+  const connection = await pool.getConnection();
+  try {
+    let totalAffected = 0;
+    for (const food of foods) {
+      const [result] = await connection.execute(
+        'INSERT INTO inventaire_aliments (nom, quantite, unite, categorie, dlc, calories, date_ajout) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [food.nom, food.quantite, food.unite, food.categorie, food.expiration, food.calories, food.date_ajout]
+      );
+      totalAffected += result.affectedRows;
+    }
+    return totalAffected;
+  } finally {
+    connection.release();
+  }
 };
 
 const processBarcodeInput = async (barcode) => {
@@ -186,19 +138,98 @@ const processBarcodeInput = async (barcode) => {
   }];
 };
 
+const processVoiceInput = async (audioData) => {
+  const base64Data = audioData.replace(/^data:audio\/[a-z]+;base64,/, '');
+  const audioBuffer = Buffer.from(base64Data, 'base64');
 
-app.post('/ingredients/add', async (req, res) => {
+  const file = await openai.files.create({
+    file: audioBuffer,
+    purpose: 'transcriptions',
+    filename: 'audio.wav',
+    contentType: 'audio/wav'
+  });
+
+  const transcription = await openai.audio.transcriptions.create({
+    file: file.id,
+    model: 'whisper-1',
+    language: 'fr'
+  });
+
+  return transcription.text;
+};
+
+const processOCRInput = async (imageData) => {
+  // Call Mistral OCR API
+  const response = await axios.post(
+    'https://api.mistral.ai/v1/ocr',
+    {
+      model: 'mistral-ocr-latest',
+      document: {
+        type: 'image_url',
+        image_url: `data:image/jpeg;base64,${imageData}`
+      },
+      include_image_base64: true
+    },
+    {
+      headers: {
+        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+  const markdown = response.data.pages[0]?.markdown || '';
+  return markdown;
+};
+
+const processPhotoInput = async (imageData) => {
+  throw new Error('Photo input not implemented yet');
+};
+
+router.get('/', async (req, res) => {
   try {
-    const { input_type, text_data, barcode, audio_data, image_data } = req.body;
+    const connection = await pool.getConnection();
+    const [rows] = await connection.execute('SELECT * FROM inventaire_aliments');
+    connection.release();
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/view', async (req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.execute('SELECT * FROM inventaire_aliments');
+    connection.release();
+    res.render('ingredients', {
+      ingredients: rows,
+      error: req.query.error,
+      success: req.query.success
+    });
+  } catch (error) {
+    res.render('ingredients', { ingredients: [], error: error.message, success: null });
+  }
+});
+
+router.get('/add', (req, res) => {
+  res.render('add-ingredient', {
+    error: req.query.error,
+    success: req.query.success
+  });
+});
+
+router.post('/add', async (req, res) => {
+  try {
+    const { input_type, text_data, barcode, image_data } = req.body;
     let foods = [];
     if (input_type === 'text') {
       foods = await structureWithAI(text_data);
     } else if (input_type === 'barcode') {
       foods = await processBarcodeInput(barcode);
-    } else if (input_type === 'voice') {
-      throw new Error('Voice input not implemented yet');
     } else if (input_type === 'ocr') {
-      throw new Error('OCR input not implemented yet');
+      if (!image_data) throw new Error('Aucune image fournie');
+      const extractedText = await processOCRInput(image_data);
+      foods = await structureWithAI('Here is the OCR of the purchase ticket, make sure to handle nutrition articles only: ' + extractedText);
     } else if (input_type === 'photo') {
       throw new Error('Photo input not implemented yet');
     } else {
@@ -207,25 +238,15 @@ app.post('/ingredients/add', async (req, res) => {
     const addedItems = await saveToDatabase(foods);
     const successMsg = `Successfully added ${addedItems} items`;
     if (req.headers.accept && req.headers.accept.includes('text/html')) {
-      return res.redirect(`/ingredients/view?success=${encodeURIComponent(successMsg)}`);
+      return res.redirect(`/ingredients/add?success=${encodeURIComponent(successMsg)}`);
     }
     res.json({ message: successMsg, items_added: addedItems });
   } catch (error) {
     if (req.headers.accept && req.headers.accept.includes('text/html')) {
-      return res.redirect(`/ingredients/view?error=${encodeURIComponent(error.message)}`);
+      return res.redirect(`/ingredients/add?error=${encodeURIComponent(error.message)}`);
     }
     res.status(500).json({ error: error.message });
   }
 });
 
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({
-    success: false,
-    message: 'Internal server error'
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+export default router;

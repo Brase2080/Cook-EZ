@@ -111,16 +111,15 @@ export class User {
       
       const [result] = await connection.execute(
         `INSERT INTO user_questionnaire 
-        (user_id, cooking_level, dietary_preferences, allergies, utensils, why_join) 
-        VALUES (?, ?, ?, ?, ?, ?)`,
+        (user_id, cooking_level, dietary_preferences, allergies, utensils) 
+        VALUES (?, ?, ?, ?, ?)`,
         [
           userId,
           cookingLevel,
           JSON.stringify(dietaryPreferences),
           JSON.stringify(allergies),
-          JSON.stringify(utensils),
-          whyJoin
-        ]
+          JSON.stringify(utensils)
+        ].map(v => v === undefined ? null : v)
       );
 
       return result.insertId;

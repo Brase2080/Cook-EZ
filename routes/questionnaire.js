@@ -55,7 +55,7 @@ router.post('/submit', authenticateToken, async (req, res) => {
             });
         }
 
-        res.json({ message: 'Questionnaire soumis avec succès' });
+        res.redirect('/dashboard');
     } catch (error) {
         console.error('Error submitting questionnaire:', error);
         res.status(500).json({ error: 'Une erreur est survenue lors de la soumission du questionnaire' });

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Ingredients</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f4f4f4; }
+    form { margin-top: 2em; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
+</head>
+<body>
+  <h1>My Ingredients</h1>
+  <% if (typeof error !== 'undefined') { %>
+    <div class="error"><%= error %></div>
+  <% } %>
+  <% if (typeof success !== 'undefined') { %>
+    <div class="success"><%= success %></div>
+  <% } %>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Quantity</th>
+        <th>Unit</th>
+        <th>Category</th>
+        <th>Expiration</th>
+        <th>Calories</th>
+        <th>Date Added</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% ingredients.forEach(ingredient => { %>
+        <tr>
+          <td><%= ingredient.nom %></td>
+          <td><%= ingredient.quantite %></td>
+          <td><%= ingredient.unite %></td>
+          <td><%= ingredient.categorie %></td>
+          <td><%= ingredient.dlc ?? ingredient.expiration %></td>
+          <td><%= ingredient.calories %></td>
+          <td><%= ingredient.date_ajout %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <h2>Add Ingredient</h2>
+  <form method="POST" action="/ingredients/add">
+    <input type="hidden" name="input_type" value="text">
+    <input type="text" name="text_data" placeholder="e.g. 2 pommes, 1L lait" required>
+    <button type="submit">Add by Text</button>
+  </form>
+
+  <h2>Add by Barcode</h2>
+  <form method="POST" action="/ingredients/add">
+    <input type="hidden" name="input_type" value="barcode">
+    <input type="text" name="barcode" placeholder="Barcode number" required>
+    <button type="submit">Add by Barcode</button>
+  </form>
+
+  <p><a href="/dashboard">Back to Dashboard</a></p>
+</body>
+</html> 
