@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Cook-EZ</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="nav">
-        <div class="container nav-content">
-            <div class="nav-title">Cook-EZ</div>
-            <a href="/auth/logout" class="nav-link">Logout</a>
-        </div>
-    </nav>
+    <%- include('partials/navbar', { user: user }) %>
 
     <% if (success) { %>
         <div class="container">

@@ -7,15 +7,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="nav">
-        <div class="container nav-content">
-            <a href="/" class="nav-title">Cook-EZ</a>
-            <div class="nav-links">
-                <a href="/auth/login" class="nav-link">Login</a>
-                <a href="/auth/register" class="nav-link">Register</a>
-            </div>
-        </div>
-    </nav>
+    <%- include('partials/navbar', { user: user }) %>
 
     <section class="hero">
         <div class="container hero-content">

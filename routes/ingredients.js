@@ -340,7 +340,8 @@ router.get('/view', authenticateToken, async (req, res) => {
         res.render('ingredients', {
             ingredients: processedIngredients,
             error: req.query.error,
-            success: req.query.success
+            success: req.query.success,
+            user: req.user // Pass user to the view
         });
     } catch (error) {
         res.render('ingredients', { ingredients: [], error: error.message, success: null });
@@ -350,7 +351,8 @@ router.get('/view', authenticateToken, async (req, res) => {
 router.get('/add', authenticateToken, (req, res) => {
     res.render('add-ingredient', {
         error: req.query.error,
-        success: req.query.success
+        success: req.query.success,
+        user: req.user // Pass user to the view
     });
 });
 

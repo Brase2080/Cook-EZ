@@ -25,11 +25,11 @@ const loginSchema = z.object({
 });
 
 router.get('/login', isAuthenticated, (req, res) => {
-    res.render('auth/login', { error: null, success: null });
+    res.render('auth/login', { error: null, success: null, user: null });
 });
 
 router.get('/register', isAuthenticated, (req, res) => {
-    res.render('auth/register', { error: null, success: null });
+    res.render('auth/register', { error: null, success: null, user: null });
 });
 
 router.post('/register', authLimiter, validateRegistration, handleValidationErrors, async (req, res) => {

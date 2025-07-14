@@ -1,0 +1,20 @@
+<nav class="glass-navbar">
+  <div class="navbar-container">
+    <a href="/" class="navbar-logo">Cook-EZ</a>
+    <input type="checkbox" id="navbar-toggle" class="navbar-toggle">
+    <label for="navbar-toggle" class="navbar-burger">
+      <span></span><span></span><span></span>
+    </label>
+    <div class="navbar-links">
+      <a href="/" class="navbar-link">Accueil</a>
+      <a href="/dashboard" class="navbar-link">Tableau de bord</a>
+      <a href="/ingredients/view" class="navbar-link">Ingrédients</a>
+      <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/auth/logout" class="navbar-link">Déconnexion</a>
+      <% } else { %>
+        <a href="/auth/login" class="navbar-link">Connexion</a>
+        <a href="/auth/register" class="navbar-link navbar-register">Inscription</a>
+      <% } %>
+    </div>
+  </div>
+</nav> 
