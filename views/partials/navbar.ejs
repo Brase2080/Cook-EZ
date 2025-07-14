@@ -7,13 +7,13 @@
     </label>
     <div class="navbar-links">
       <a href="/" class="navbar-link">Accueil</a>
-      <a href="/dashboard" class="navbar-link">Tableau de bord</a>
-      <a href="/ingredients/view" class="navbar-link">Ingrédients</a>
       <% if (typeof user !== 'undefined' && user) { %>
+        <a href="/dashboard" class="navbar-link">Tableau de bord</a>
+        <a href="/ingredients/view" class="navbar-link">Ingrédients</a>
         <a href="/auth/logout" class="navbar-link">Déconnexion</a>
       <% } else { %>
         <a href="/auth/login" class="navbar-link">Connexion</a>
-        <a href="/auth/register" class="navbar-link navbar-register">Inscription</a>
+        <a href="/auth/register" class="navbar-link navbar-register-upgraded">Inscription</a>
       <% } %>
     </div>
   </div>
