@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/recipe-details.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                <%- include('../partials/sidebar') %>
+            </div>
+            <div class="col-md-10">
+                <div class="recipe-details-container">
+                    <div class="recipe-header">
+                        <button class="btn btn-outline-secondary mb-3" onclick="history.back()">
+                            <i class="fas fa-arrow-left"></i> Retour
+                        </button>
+                        
+                        <div class="recipe-main-info">
+                            <div class="recipe-image-large">
+                                <% if (recipe.image_url) { %>
+                                    <img src="<%= recipe.image_url %>" alt="<%= recipe.nom %>">
+                                <% } else { %>
+                                    <div class="image-placeholder">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="recipe-info">
+                                <h1><%= recipe.nom %></h1>
+                                <p class="recipe-description"><%= recipe.description %></p>
+                                
+                                <div class="recipe-stats">
+                                    <div class="stat-item">
+                                        <i class="fas fa-clock"></i>
+                                        <span><%= recipe.temps_total %> min</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="fas fa-users"></i>
+                                        <span><%= recipe.portions %> personnes</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <i class="fas fa-signal"></i>
+                                        <span><%= recipe.difficulte %></span>
+                                    </div>
+                                    <% if (recipe.calories_par_portion) { %>
+                                        <div class="stat-item">
+                                            <i class="fas fa-fire"></i>
+                                            <span><%= recipe.calories_par_portion %> cal/portion</span>
+                                        </div>
+                                    <% } %>
+                                </div>
+
+                                <div class="recipe-tags">
+                                    <% recipe.tags.forEach(tag => { %>
+                                        <span class="tag-badge">#<%= tag %></span>
+                                    <% }) %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recipe-content">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="ingredients-section">
+                                    <h3><i class="fas fa-list"></i> Ingrédients</h3>
+                                    <div class="ingredients-list">
+                                        <% recipe.ingredients.forEach(ingredient => { %>
+                                            <div class="ingredient-item">
+                                                <span class="ingredient-quantity"><%= ingredient.quantite %> <%= ingredient.unite %></span>
+                                                <span class="ingredient-name"><%= ingredient.nom_ingredient %></span>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="instructions-section">
+                                    <h3><i class="fas fa-utensils"></i> Instructions</h3>
+                                    <div class="instructions-content">
+                                        <%- recipe.instructions.replace(/\n/g, '<br>') %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

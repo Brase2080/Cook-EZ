@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/recipes.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+            </div>
+            <div class="col-md-10">
+                <div class="recipes-container">
+                    <div class="header-section">
+                        <h1><i class="fas fa-utensils"></i> Découverte de recettes</h1>
+                        <p class="text-muted">Explorez nos collections de recettes organisées par thème</p>
+                    </div>
+
+                    <% categories.forEach(category => { %>
+                        <div class="category-section" data-category-id="<%= category.id %>">
+                            <div class="category-header">
+                                <h2><%= category.nom %></h2>
+                                <p class="category-description"><%= category.description %></p>
+                                <span class="badge bg-secondary"><%= category.total_recettes %> recettes</span>
+                            </div>
+
+                            <div class="recipes-grid">
+                                <% if (category.recettes.length > 0) { %>
+                                    <% category.recettes.forEach(recipe => { %>
+                                        <div class="recipe-card" onclick="viewRecipe(<%= recipe.id %>)">
+                                            <div class="recipe-image">
+                                                <% if (recipe.image_url) { %>
+                                                    <img src="<%= recipe.image_url %>" alt="<%= recipe.nom %>">
+                                                <% } else { %>
+                                                    <div class="image-placeholder">
+                                                        <i class="fas fa-utensils"></i>
+                                                    </div>
+                                                <% } %>
+                                                <div class="recipe-difficulty">
+                                                    <span class="badge bg-<%= recipe.difficulte === 'facile' ? 'success' : recipe.difficulte === 'moyen' ? 'warning' : 'danger' %>">
+                                                        <%= recipe.difficulte %>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="recipe-content">
+                                                <h4><%= recipe.nom %></h4>
+                                                <p class="recipe-description"><%= recipe.description %></p>
+                                                <div class="recipe-meta">
+                                                    <span><i class="fas fa-clock"></i> <%= recipe.temps_total %> min</span>
+                                                    <span><i class="fas fa-users"></i> <%= recipe.portions %> pers.</span>
+                                                    <% if (recipe.calories_par_portion) { %>
+                                                        <span><i class="fas fa-fire"></i> <%= recipe.calories_par_portion %> cal</span>
+                                                    <% } %>
+                                                </div>
+                                                <div class="recipe-tags">
+                                                    <% recipe.tags.forEach(tag => { %>
+                                                        <span class="tag-badge">#<%= tag %></span>
+                                                    <% }) %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <div class="no-recipes">
+                                        <i class="fas fa-utensils"></i>
+                                        <p>Aucune recette disponible dans cette catégorie</p>
+                                    </div>
+                                <% } %>
+                            </div>
+
+                            <% if (category.total_recettes > 5) { %>
+                                <div class="load-more-section">
+                                    <button class="btn btn-outline-primary load-more-btn" onclick="loadMoreRecipes(<%= category.id %>)">
+                                        Voir plus de recettes (<%= category.total_recettes - 5 %> restantes)
+                                    </button>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/recipes.js"></script>
+</body>
+</html>

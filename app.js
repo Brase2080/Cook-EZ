@@ -12,6 +12,7 @@ import { authenticateToken } from './middleware/auth.js';
 import dashboardRoutes from './routes/dashboard.js';
 import questionnaireRoutes from './routes/questionnaire.js';
 import ingredientsRoutes from './routes/ingredients.js';
+import recipesRoutes from './routes/recipes.js';
 import axios from 'axios';
 import OpenAI from 'openai';
 
@@ -76,6 +77,7 @@ app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/questionnaire', questionnaireRoutes);
 app.use('/ingredients', ingredientsRoutes);
+app.use('/recipes', recipesRoutes);
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
