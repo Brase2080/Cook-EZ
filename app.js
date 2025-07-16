@@ -57,6 +57,7 @@ app.use(passport.session());
 
 app.set('view engine', 'ejs');
 app.set('views', './views');
+app.set('trust proxy', 1);
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {

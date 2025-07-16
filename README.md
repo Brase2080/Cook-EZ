@@ -17,58 +17,62 @@ With Cook-EZ:
 
 ---
 
-## 🚀 Key Features
+## 🚦 Project Status
 
-### 🍲 AI Recipe Generation
+### ✅ Finished Features
+- AI-generated recipes based on ingredients, preferences, and calorie needs
+- Smart database for recommending quality pre-made recipes
+- Calorie, ecological impact, and shelf life estimation
+- Realistic food images generated with Stable Diffusion
+- Newsfeed with seasonal foods, price alerts, and nutrition insights
+- User questionnaire for preferences, allergies, utensils, etc.
+- Ingredient input via text and barcode
+- Authentication and dashboard
+- Recipe browsing and details
 
-- Recipes generated on the fly according to your **preferences, diet, allergies**, and available **kitchen tools**.
-- Smart fridge analysis system (via photos, receipts, or manual entry).
-- Automatic calculation: **calories**, **ecological impact**, **shelf life**, **difficulty**.
-- **Realistic images** of each recipe automatically generated.
+### 🛠️ In Progress
+- Ingredient input via voice, OCR, and photo (UI present, backend stubs exist, not yet implemented)
+- Advanced AI-based recommendations and adaptive intelligence
+- Nutrition/activity tracking (sync with fitness apps)
+- Community features (favorites, suggestions)
 
-### 📈 Nutrition and Activity Tracking
-
-- Personalized goals based on your **health profile**.
-- Calorie deficit calculated via manual entry or automatic syncing with sports activity.
-
-### 🌱 Eco-Friendly and Budget-Conscious Cooking
-
-- Carbon footprint indicator for each recipe.
-- Recipes adapted to your **ecological goals** and **weekly budget**.
-
-### 🔁 Adaptive Intelligence
-
-- Recipe history and preferences learned automatically.
-- AI-based recommendations, **community favorites**, and suggestions from our **recipe database**.
-
-### 📰 News & Ecosystem
-
-- Nutrition insights, seasonal recipes, price alerts, and tips.
-- Notifications, widgets, and mobile/desktop sync.
-
----
+### 🕒 Planned
+- Voice assistant integration
+- Offline mode with delayed sync
+- Smart weekly meal planning (budget, ecology, health goals)
+- Widget support (mobile & desktop)
+- Public API for third-party integration
 
 ---
 
 ## 🗺️ Roadmap
 
-### ✅ MVP (v1.0)
-
-- AI-generated recipes based on ingredients, preferences, and calorie needs  
-- Smart database to recommand quality pre-made recipes
-- Calorie, ecological impact, and shelf life estimation  
-- Realistic food images generated with Stable Diffusion  
-- Newsfeed with seasonal foods, price alerts, and nutrition insights  
+- [x] AI-generated recipes based on ingredients, preferences, and calorie needs
+- [x] Smart database to recommend quality pre-made recipes
+- [x] Calorie, ecological impact, and shelf life estimation
+- [x] Realistic food images generated with Stable Diffusion
+- [x] Newsfeed with seasonal foods, price alerts, and nutrition insights
+- [ ] Ingredient input via voice, OCR, and photo
+- [ ] Advanced AI-based recommendations and adaptive intelligence
+- [ ] Nutrition/activity tracking (sync with fitness apps)
+- [ ] Community features (favorites, suggestions)
+- [ ] Voice assistant integration
+- [ ] Offline mode with delayed sync
+- [ ] Smart weekly meal planning (budget, ecology, health goals)
+- [ ] Widget support (mobile & desktop)
+- [ ] Public API for third-party integration
 
 ---
 
-### 🚀 Future Versions
+## 🖼️ UI Wireframes & Mobile Designs
 
-- Voice assistant integration  
-- Offline mode with delayed sync  
-- Smart weekly meal planning (budget, ecology, health goals)  
-- Widget support (mobile & desktop)  
-- Public API for third-party integration  
+### Wireframes
+![Wireframe 1](https://imgur.com/PolbSU7.png)
+![Wireframe 2](https://imgur.com/Td98i9T.png)
+
+### Mobile Designs
+![Mobile Design 1](https://imgur.com/mISixl0.png)
+![Mobile Design 2](https://imgur.com/C0ow6VP.png)
 
 ---
 
